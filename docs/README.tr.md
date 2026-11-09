@@ -1,113 +1,248 @@
-# IKEA TRÅDFRI Zigbee kontrolcüsü (XIAO ESP32-C6)
+<p align="center">
+  <img src="media/banner.jpg" alt="Akşam ışığında, sıcak kâğıt lambalarla aydınlanan oturma odası; yan sehpada yuvarlak kablosuz kumanda ve küçük bir geliştirme kartı" width="100%">
+</p>
 
-[English](../README.md) · **Türkçe**
+<h1 align="center">
+  <img src="media/svg/logo.svg" width="44" align="center" alt=""> ikea-zigbee-esp32c6
+</h1>
 
-ESP32-C6 kendi Zigbee ağını kurar (coordinator) ve evdeki WiFi'ye bağlanıp bir web sayfası sunar. Sayfaya evdeki herhangi bir telefon ya da bilgisayardan **http://ikea.local** adresiyle girilir.
+<p align="center">
+  <b>IKEA TRÅDFRI lambalarını parmak boyutunda bir Seeed XIAO ESP32-C6 ile telefonun tarayıcısından yönet.</b><br>
+  IKEA ağ geçidi, uygulama, bulut hesabı ya da Home Assistant gerekmez. Elindeki kumandalar çalışmaya devam eder.
+</p>
 
-- Her oda bir Zigbee grubudur.
-- **Lambalar** eşlenirken odanın grubuna eklenir.
-- **Kumandalar** (yuvarlak 5 tuşlu E1810/E1524, kare STYRBAR) odanın grubuna *bind* edilir. Kumandaya basınca komut doğrudan lambalara gider. ESP kapalıyken de kumandalar çalışır.
-- Web sayfasından odaları açıp kapatabilir, parlaklık ve renk sıcaklığını ayarlayabilir, yeni cihaz ekleyebilir ve oda adlarını değiştirebilirsin.
+<p align="center">
+  <img alt="ESP-IDF 5.4" src="https://img.shields.io/badge/ESP--IDF-5.4-e7352c?logo=espressif&logoColor=white">
+  <img alt="Kart" src="https://img.shields.io/badge/kart-XIAO%20ESP32--C6-2e7d32">
+  <img alt="Zigbee 3.0" src="https://img.shields.io/badge/Zigbee-3.0%20coordinator-eb0443">
+  <img alt="Arayüz dilleri" src="https://img.shields.io/badge/aray%C3%BCz-English%20%7C%20T%C3%BCrk%C3%A7e-8a4b17">
+  <img alt="Lisans MIT" src="https://img.shields.io/badge/lisans-MIT-blue">
+</p>
 
-## İlk kurulum: WiFi
+<p align="center"><a href="../README.md">English</a> · <b>Türkçe</b></p>
 
-1. Kartı herhangi bir USB şarj aletine tak.
-2. Telefonda WiFi listesini aç ve **IKEA-Zigbee-Kurulum** ağına bağlan. Bu ağın şifresi yok.
-3. Kurulum sayfası kendiliğinden açılır. Açılmazsa tarayıcıda `http://192.168.4.1` adresine git.
-4. **Tara**'ya bas, evdeki WiFi'yi seç, şifresini yaz ve **Kaydet ve yeniden başlat**'a bas.
-5. Telefonu tekrar evdeki WiFi'ye bağla ve `http://ikea.local` adresini aç.
-   `ikea.local` açılmazsa modemin cihaz listesinde "ikea" adlı cihazın IP adresini bul ve onu kullan.
+<p align="center">
+  <img src="media/hero.jpg" alt="Telefon ekran görüntüleri: açık tema, koyu tema ve oda çizimi seçici" width="100%">
+</p>
 
-WiFi'yi değiştirmek ya da sıfırlamak için kartın üstündeki **BOOT** tuşunu 5 saniye basılı tut. Kart kurulum moduna döner. Firmware'e gömülü WiFi (`main/wifi_secret.h`) bundan sonra kullanılmaz; kurulum sayfasından yeni WiFi kaydedilene kadar kurulum ağı açık kalır. Ev ağı yalnızca geçici olarak gidince kart kurulum moduna geçmez, bağlanmayı denemeye devam eder.
+## Nedir
 
-Not: ESP32-C6 yalnızca 2,4 GHz WiFi'ye bağlanabilir.
+Evimizde ağ geçidi olmayan 5 yıllık bir TRÅDFRI düzeni vardı: lambalar, salonda kare STYRBAR kumanda, mutfakta yuvarlak kumanda. Bu proje parmak boyutundaki **XIAO ESP32-C6**'yı bu lambaların Zigbee coordinator'ı yapıyor. Kart aynı zamanda ev WiFi'sinde **http://ikea.local** adresinde küçük ve hızlı bir web sayfası sunuyor.
 
-## Durum LED'i
+- Her **oda bir Zigbee grubudur**. Lambalar eşlenirken odanın grubuna eklenir.
+- **Kumandalar doğrudan odanın grubuna bağlanır.** Tuşa basınca komut ESP'ye uğramadan kumandadan lambalara gider. Kartın fişi çekilse bile kumandalar çalışır.
+- Web sayfası lambaların kendi bildirimlerini okur. Biri kumandayla ışığı kısınca kaydırıcı bütün telefonlarda kayar.
 
-Kartın üstündeki küçük sarı LED (GPIO15) durumu gösterir:
+## Özellikler
 
-| LED | Anlamı |
+| | |
 |---|---|
-| BOOT basılıyken sürekli yanar | Tuşa basıldı, 5 saniye sayılıyor |
-| Hızlı yanıp söner (5 Hz) | 5 saniye doldu, ya da kart kurulum modunda (IKEA-Zigbee-Kurulum ağı açık) |
-| Yanıp söner (2 Hz) | Kurulum ağına bir telefon bağlandı. Normal çalışmada: eşleme açık |
-| Yavaş yanıp söner (0,5 Hz) | Açılış: ev WiFi'sine bağlanıyor ya da Zigbee başlıyor |
-| 2 saniyede bir kısa çakar | Ev WiFi'sine bağlı, her şey çalışıyor |
+| <img src="media/svg/icon-power.svg" width="22"> **Odalar tek bakışta** | Her oda için bir kart: aç/kapat, parlaklık ve renk sıcaklığı (sıcak 2200 K, doğal 2700 K, soğuk 4000 K). Bir de "tüm ışıkları kapat" düğmesi var. |
+| <img src="media/svg/room-living.svg" width="22"> **Oda çizimleri** | ESP oda adına göre bir çizim seçer (salon, mutfak, yatak odası, banyo, çocuk odası, çalışma, hol, diğer). Oda açıkken çizimdeki lamba parlar. Başka bir çizim için çizime dokun. Seçim kartta saklanır. |
+| <img src="media/svg/icon-moon.svg" width="22"> **Gece modu** | Gece ışığı açık unutanlar için. Her oda için seçilen saatlerde (varsayılan 00:00–04:00) açık kalan ışık, N dakika sonra (varsayılan 5) seçilen seviyeye (varsayılan %1) kısılır. Hiçbir ışığı kapatmaz. |
+| <img src="media/svg/icon-remote-round.svg" width="22"> **Kumandalar çalışmaya devam eder** | Aç/kapat ve kısma odanın grubuna bağlıdır. Sol/sağ ok tuşları ESP'ye bağlıdır, ESP bunları odanın renk sıcaklığını değiştiren adımlara çevirir. |
+| <img src="media/svg/icon-sun.svg" width="22"> **Zıplamayan kaydırıcılar** | Bir komuttan sonra oda, bütün lambalar hedefe ulaştığını bildirene kadar hedef değeri gösterir. Çok LED'li odalarda değer eskiyle yeni arasında gidip gelmez. |
+| <img src="media/svg/icon-wifi.svg" width="22"> **Kurulum ağıyla kurulum** | Kayıtlı WiFi yoksa kart `IKEA-Zigbee-Kurulum` adında şifresiz bir ağ açar ve telefonda kurulum sayfası kendiliğinden açılır. Geri dönmek için **BOOT** tuşunu 5 saniye basılı tut. |
+| <img src="media/svg/icon-globe.svg" width="22"> **Türkçe ve İngilizce** | Sayfa tarayıcının dilini izler, Ayarlar'dan değiştirilebilir. Firmware'den gelen mesajlar sayfada çevrilir. Tema: telefona göre, açık ya da koyu. |
+| <img src="media/svg/icon-clock.svg" width="22"> **İnternetten saat** | Saat SNTP'den alınır. Sayfa tarayıcının saat dilimini, yaz saati kurallarıyla birlikte, karta bir kez gönderir. |
+| <img src="media/svg/icon-gear.svg" width="22"> **Tek dosya, internetsiz** | Sayfa yaklaşık 50 KB'lık tek bir HTML dosyası. CDN, yazı tipi ya da framework yok, firmware'in içine gömülü. |
 
-BOOT 5 saniye basılı tutulunca LED hızlı yanıp sönmeye başlar. Tuş bırakılınca kart yeniden başlar ve kurulum modunda da hızlı yanıp söner.
+## Ekran görüntüleri
 
-## Oda ekleme ve eşleme
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="media/night-settings.jpg" alt="Her oda için gece modu ayarları"><br><sub><b>Her oda için gece modu</b>: saatler, süre, seviye</sub></td>
+    <td align="center" width="33%"><img src="media/status-settings.jpg" alt="WiFi sinyali, Zigbee durumu, tema ve dil"><br><sub><b>Ayarlar</b>: WiFi sinyali, Zigbee, tema, dil</sub></td>
+    <td align="center" width="33%"><img src="media/devices.jpg" alt="Lambalar ve kumandalarla cihaz listesi"><br><sub><b>Cihazlar</b>: oda değiştir, yeniden bağla, unut</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="media/picker.jpg" alt="Çizim seçici"><br><sub>Her oda için <b>çizim seç</b></sub></td>
+    <td align="center"><img src="media/setup-ap.jpg" alt="Kurulum modunda WiFi sayfası"><br><sub><b>İlk açılış</b>: kurulum ağından WiFi ayarı</sub></td>
+    <td align="center"><img src="media/home-tr.jpg" alt="Sayfanın Türkçe hali"><br><sub><b>Türkçe</b>: Ayarlar'da tek dokunuş</sub></td>
+  </tr>
+</table>
 
-> **Dikkat:** Sıfırlanan lamba ve kumanda eski eşleşmesini kaybeder. Önce tek bir odada dene.
-> Geri dönmek istersen IKEA'nın normal yöntemi geçerlidir: kumandayı lambaya yakın tutup eşleme tuşuna basılı tut.
+<p align="center"><img src="media/desktop.jpg" alt="Oda kartlarının iki sütunda durduğu bilgisayar görünümü" width="90%"><br><sub>Bilgisayarda odalar iki sütunda durur.</sub></p>
 
-1. Sayfada **Cihaz ekle** bölümünde odayı seç ya da "+ Yeni oda…" seçip bir ad yaz, sonra **Eşlemeyi başlat**'a bas. Eşleme 3 dakika açık kalır.
-2. **Lambaları sıfırla:** Odadaki lambaların duvar anahtarını 6 kez kapatıp aç. Lamba yanıp sönerek sıfırlandığını gösterir. Her lamba "Katılan cihazlar" listesinde görünür.
-3. **Kumandayı sıfırla:** Kumandayı lambaların yakınında tut ve arkasındaki küçük eşleme tuşuna 5 saniye içinde 4 kez bas. Listede "Kumanda odaya bağlandı" yazmalı.
-4. Olaylarda "Lamba ... odanın grubunda" ve "Kumandanın ok tuşları ESP'ye bağlandı" satırlarını gördükten sonra **Bitir**'e bas.
+### Çizimler
 
-"Kumanda bağlanamadı" yazarsa kumandanın bir tuşuna bas, ardından hemen **Cihazlar** bölümünde o kumandanın odasını tekrar seç.
+Bütün çizimler elle yazılmış, sayfanın temasına uyan SVG'ler. Oda açıkken o odanın çizimindeki lamba parlar (`.lit`).
+
+| <img src="media/svg/room-living.svg" width="120"> | <img src="media/svg/room-kitchen.svg" width="120"> | <img src="media/svg/room-bedroom.svg" width="120"> | <img src="media/svg/room-bath.svg" width="120"> |
+|:--:|:--:|:--:|:--:|
+| Salon | Mutfak | Yatak odası | Banyo |
+| <img src="media/svg/room-kids.svg" width="120"> | <img src="media/svg/room-office.svg" width="120"> | <img src="media/svg/room-hall.svg" width="120"> | <img src="media/svg/room-generic.svg" width="120"> |
+| Çocuk odası | Çalışma | Hol | Diğer |
+
+<p align="center">
+  <img src="media/svg/icon-sun.svg" width="28" title="parlaklık">&nbsp;
+  <img src="media/svg/icon-temp.svg" width="28" title="renk sıcaklığı">&nbsp;
+  <img src="media/svg/icon-moon.svg" width="28" title="gece modu">&nbsp;
+  <img src="media/svg/icon-lamp.svg" width="28" title="lamba">&nbsp;
+  <img src="media/svg/icon-remote-round.svg" width="28" title="yuvarlak kumanda">&nbsp;
+  <img src="media/svg/icon-remote-square.svg" width="28" title="kare kumanda">&nbsp;
+  <img src="media/svg/icon-mesh.svg" width="28" title="Zigbee">&nbsp;
+  <img src="media/svg/icon-wifi.svg" width="28" title="WiFi">&nbsp;
+  <img src="media/svg/icon-clock.svg" width="28" title="saat">&nbsp;
+  <img src="media/svg/icon-gear.svg" width="28" title="ayarlar">&nbsp;
+  <img src="media/svg/icon-globe.svg" width="28" title="dil">&nbsp;
+  <img src="media/svg/icon-power.svg" width="28" title="güç">
+</p>
+
+## Nasıl çalışır
+
+```mermaid
+flowchart LR
+  phone["📱 Telefon tarayıcısı<br/>http://ikea.local"] -- "ev WiFi'si üzerinden HTTP" --> esp
+  subgraph esp ["XIAO ESP32-C6"]
+    web["Web sunucusu + JSON API"] --- zb["Zigbee coordinator<br/>kanal 15 / 20 / 25"]
+  end
+  zb -- "grup komutları<br/>(her oda bir grup)" --> lamps["💡 TRÅDFRI lambalar"]
+  remote["🎛️ TRÅDFRI kumandalar"] -- "aç/kapat + kısma<br/>odanın grubuna bağlı" --> lamps
+  remote -- "ok tuşları<br/>(Scenes kümesi, unicast)" --> zb
+  lamps -- "durum bildirimleri<br/>açık/kapalı, seviye, renk" --> zb
+```
+
+- WiFi ve 802.15.4 radyosu tek bir RF katını paylaşır. Firmware ikisinin de kullanılabilir kalması için WiFi/Zigbee birlikte çalışmasını ve modem uykusunu açar. Zigbee ağını 2,4 GHz WiFi ile en az çakışan 15, 20 ya da 25 numaralı kanallardan birinde kurar.
+- Kurulum modunda (erişim noktası) Zigbee başlatılmaz, çünkü SoftAP ve Zigbee radyoyu güvenilir şekilde paylaşamıyor. Kumandalar lambaları doğrudan kontrol etmeye devam eder.
+- Lambalardan açık/kapalı, seviye ve renk sıcaklığını coordinator'a bildirmeleri istenir (en az 1 sn, en çok 10 dk arayla). Sayfa `/api/state`'i 2 saniyede bir okur.
+
+## Donanım
+
+| Parça | Notlar |
+|---|---|
+| [Seeed Studio XIAO ESP32-C6](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/) | Kart üstündeki anteni kullanır (GPIO3 low = RF anahtarı açık, GPIO14 low = dahili anten). GPIO15'teki sarı LED durumu gösterir. |
+| IKEA TRÅDFRI lambalar | Kısılabilir ve beyaz tonlu lambalarla denendi. Yalnızca kısılabilen lambalarda renk sıcaklığı görünmez. |
+| IKEA kumandalar | Kare **STYRBAR (E2002)** ve yuvarlak 5 tuşlu **(E1810)** kumandayla denendi. |
+| USB-C güç | Herhangi bir telefon şarj aleti. |
+
+## Başlarken
+
+### 1. Derle ve yükle
+
+[ESP-IDF v5.4](https://docs.espressif.com/projects/esp-idf/en/v5.4/esp32c6/get-started/) gerekli. Zigbee ve mDNS kütüphaneleri ilk derlemede component manager tarafından indirilir.
+
+```bash
+git clone https://github.com/melihkarakelle/ikea-zigbee-esp32c6.git
+cd ikea-zigbee-esp32c6
+. ~/esp/esp-idf/export.sh
+idf.py set-target esp32c6
+idf.py -p /dev/cu.usbmodem2101 flash monitor   # port adı sende farklı olabilir
+```
+
+İstersen ev WiFi'sini firmware'e gömebilirsin: `main/wifi_secret.example.h` dosyasını `main/wifi_secret.h` olarak kopyala ve doldur. Bu dosya git'e girmez. Dosya yoksa kart kurulum modunda açılır.
+
+### 2. WiFi'ye bağla
+
+1. Karta güç ver. LED hızlı yanıp söner (5 Hz).
+2. Telefonda şifresiz **IKEA-Zigbee-Kurulum** ağına bağlan. Kurulum sayfası kendiliğinden açılır. Açılmazsa `http://192.168.4.1` adresine git. Telefon bağlanınca LED 2 Hz'e düşer.
+3. **Tara**'ya bas, ağını seç, şifreyi yaz ve **Kaydet ve yeniden başlat**'a bas.
+4. Telefonu ev WiFi'sine geri bağla ve **http://ikea.local** adresini aç. Cihazında `.local` adresleri açılmıyorsa modemin cihaz listesinde `ikea` adlı kartı bul.
+
+ESP32-C6 yalnızca 2,4 GHz ağlara bağlanır.
+
+### 3. Oda eşle
+
+> [!WARNING]
+> Sıfırlanan lamba ve kumanda eski eşleşmesini kaybeder. Önce tek bir odada dene. Geri dönmek için IKEA'nın normal yöntemi geçerli: kumandayı lambanın yanında tut ve eşleme tuşunu basılı tut.
+
+1. **Ayarlar → Cihaz ekle**'yi aç, bir oda seç ya da yeni oda oluştur ve **Eşlemeyi başlat**'a bas. Eşleme 3 dakika açık kalır.
+2. **Lambaları sıfırla.** Duvar anahtarından **6 kez** kapatıp aç. Her lamba yanıp söner ve *Katılan cihazlar* listesinde görünür.
+3. **Kumandayı sıfırla.** Lambaların yakınında tut ve arkasındaki küçük eşleme tuşuna **5 saniye içinde 4 kez** bas.
+4. Olaylarda *Lamba … odanın grubunda* ve *Kumandanın ok tuşları ESP'ye bağlandı* satırlarını görünce **Bitir**'e bas.
+
+Kumanda bağlanamazsa (kumandalar tuşlar arasında uyur) bir tuşuna bas, sonra **Cihazlar**'da yanındaki **Yeniden bağla**'ya dokun.
 
 ## Gece modu
 
-Her oda kartının altında **Gece modu** anahtarı ve **Düzenle** düğmesi var. Düzenle, Ayarlar'daki **Gece modu** bölümünde o odanın satırını açar. Her oda için ayrı ayrı seçilir:
+Her oda kartında bir **Gece modu** anahtarı ve **Düzenle** düğmesi var. Düzenle, **Ayarlar → Gece modu**'nda o odanın satırına götürür. Orada şunlar seçilir:
 
-- saat aralığı (varsayılan 00:00–04:00)
-- ne kadar sonra kısılacağı (1, 2, 5, 10, 15, 30, 60 dk; varsayılan 5 dk)
-- hangi seviyeye kısılacağı (%1, 2, 5, 10, 20, 30, 50; varsayılan %1)
+- **Saatler.** Varsayılan 00:00–04:00. 22–06 gibi gece yarısını geçen aralıklar da çalışır.
+- **Süre.** 1, 2, 5, 10, 15, 30 ya da 60 dakika. Varsayılan 5.
+- **Seviye.** %1, 2, 5, 10, 20, 30 ya da 50. Varsayılan %1.
 
-Bu saatlerde bir odanın ışığı açık ve seçilen seviyeden parlaksa, seçilen süre sonunda 3 saniyede o seviyeye kısılır. Işık kapanmaz, kapalı ışık da açılmaz. Gece biri ışığı tekrar açarsa ya da parlaklığı artırırsa süre yeniden başlar. Saat aralığı başladığında açık unutulmuş ışıklar da seçilen süre sonunda kısılır.
-- Saat internetten (NTP, `pool.ntp.org`) alınır. Saat dilimi sayfayı açan tarayıcıdan öğrenilir ve kaydedilir, varsayılan Europe/London. Saat alınamazsa gece modu çalışmaz, üstteki etikette "Saat bekleniyor" yazar.
-- Lambaların durumu (açık/kapalı, parlaklık, renk) lambaların ESP'ye gönderdiği bildirimlerden okunur. Kumandayla yapılan değişiklikler de sayfada görünür.
+Bu saatlerde açık ve seçilen seviyeden parlak bir ışık, süre dolunca 3 saniyede o seviyeye kısılır. Işığı tekrar açmak ya da parlaklığı artırmak süreyi yeniden başlatır. Kapalı ışıklar hiçbir zaman açılmaz. Gece modu için internetten saat gerekir; saat bilinene kadar üst satırdaki saat `--:--` gösterir.
+
+## Durum LED'i
+
+| LED | Anlamı |
+|---|---|
+| **BOOT** basılıyken sürekli yanar | Tuşa basıldı, 5 saniye sayılıyor |
+| Hızlı yanıp söner, 5 Hz | 5 saniye doldu ve WiFi sıfırlanıyor, **ya da** kurulum modu bir telefon bekliyor |
+| Yanıp söner, 2 Hz | Kurulum ağına bir telefon bağlandı. Normal çalışmada: eşleme açık. |
+| Yavaş yanıp söner, 0,5 Hz | Açılış: WiFi'ye bağlanıyor ya da Zigbee başlıyor |
+| 2 saniyede bir kısa çakar | Bağlı ve çalışıyor |
+
+WiFi sıfırlaması yalnızca WiFi ayarını siler. Lambalar, kumandalar, odalar, gece modu ayarları ve Zigbee ağı yerinde kalır. Sıfırlamadan sonra firmware'e gömülü WiFi kullanılmaz; kart, bir ağ kaydedilene kadar kurulum modunda kalır.
 
 ## Web API
 
-Sayfanın kullandığı uç noktalar. Hepsi aynı zamanda başka araçlardan (ör. Home Assistant, curl) da çağrılabilir.
+Sayfa küçük bir JSON API kullanır. Bu API'yi betiklerden ya da başka ev araçlarından da çağırabilirsin.
 
 | İstek | Ne yapar |
 |---|---|
-| `GET /api/state` | Ağ durumu, odalar, cihazlar ve eşleme durumu (JSON) |
-| `GET /api/events?after=N` | N'den sonraki olaylar |
-| `POST /api/cmd` `room=<n>&a=on\|off\|toggle\|dim\|temp&v=<değer>` | `room=0` tüm lambalar demek. `dim` için 0–100, `temp` için Kelvin (2200–4000) |
-| `POST /api/pair` `room=<n>&s=180` ya da `stop=1` | Eşlemeyi açar ya da kapatır |
-| `POST /api/device` `i=<#>&room=<n>` ya da `i=<#>&forget=1` | Cihazı başka odaya taşır ya da listeden siler |
-| `POST /api/room` `id=<n>&name=<ad>` | Oda adını değiştirir |
-| `POST /api/room` `id=<n>&icon=<0-8>` | Oda çizimi. 0 otomatik (oda adına göre), 1 salon, 2 mutfak, 3 yatak odası, 4 banyo, 5 çocuk odası, 6 çalışma, 7 hol, 8 diğer |
-| `POST /api/night` `id=<n>&on=1&from=0&to=4&pct=1&delay=5` | Odanın gece modu: saatler 0–23, `pct` kısılacak seviye 1–100, `delay` dakika 1–120 (`pct`/`delay` verilmezse eskisi kalır) |
+| `GET /api/state` | Ağ durumu, odalar (anlık açık/seviye/kelvin), cihazlar, eşleme durumu |
+| `GET /api/events?after=N` | N numaralı olaydan sonraki olaylar |
+| `POST /api/cmd` `room=<n>&a=on\|off\|toggle\|dim\|temp&v=<değer>` | `room=0` tüm lambalar demek. `dim` 0–100, `temp` Kelvin (2200–4000) alır. |
+| `POST /api/pair` `room=<n>&s=180` ya da `stop=1` | Bir oda için eşlemeyi açar ya da kapatır |
+| `POST /api/device` `i=<#>&room=<n>` · `i=<#>&forget=1` · `i=<#>&arrows=1` | Cihazı taşır, unutur ya da kumandayı yeniden bağlar |
+| `POST /api/room` `id=<n>&name=<ad>` · `id=<n>&icon=<0-8>` | Odanın adını ya da çizimini değiştirir (0 = otomatik) |
+| `POST /api/night` `id=<n>&on=1&from=0&to=4&pct=1&delay=5` | Odanın gece modu. `pct` ve `delay` isteğe bağlı; verilmezse eski değerler kalır. |
 | `POST /api/tz` `tz=<POSIX TZ>` | Saat dilimi, ör. `GMT0BST,M3.5.0/1,M10.5.0` |
-| `GET /api/scan`, `POST /api/wifi` `ssid=..&pass=..` | WiFi tarama ve kaydetme |
-
-Örnek:
+| `GET /api/scan` · `POST /api/wifi` `ssid=..&pass=..` | WiFi tarama ve kaydetme |
 
 ```bash
-curl -X POST http://ikea.local/api/cmd -d "room=1&a=off"
+curl -X POST http://ikea.local/api/cmd -d "room=1&a=dim&v=30"
 ```
 
-Güvenlik: Sayfada şifre yok. Ev ağındaki herkes ışıkları kontrol edebilir. Sayfa internete açılmamalıdır.
+> [!CAUTION]
+> Sayfada şifre yok. Ev ağındaki herkes ışıkları kontrol edebilir. Sayfayı internete açma.
 
-## Derleme ve yükleme
+## Web sayfası üzerinde çalışmak
 
-Gerekli: ESP-IDF v5.4 (`~/esp/esp-idf`). İstersen ev WiFi'sini firmware'e gömebilirsin: `main/wifi_secret.example.h` dosyasını `main/wifi_secret.h` olarak kopyala ve doldur (git'e girmez). Kurulum sayfasından ya da konsoldan kaydedilen WiFi bunun önüne geçer. Dosya yoksa kart kurulum modunda açılır. Zigbee ve mDNS kütüphaneleri ilk derlemede component manager tarafından indirilir.
+Sayfa üzerinde çalışmak için karta gerek yok. API'nin küçük bir taklidi `main/web/index.html`'i örnek odalarla sunar:
 
 ```bash
-. ~/esp/esp-idf/export.sh
-idf.py set-target esp32c6
-idf.py -p /dev/cu.usbmodem21101 flash
+python3 tools/mock_server.py          # http://127.0.0.1:8765
+python3 tools/mock_server.py --ap     # kurulum modu sayfası
 ```
 
-USB seri konsol yedek olarak duruyor. Açmak için `./monitor.sh` çalıştır, `help` yazınca komutlar listelenir (`pair`, `on`, `off`, `dim`, `temp`, `list`, `assign`, `ip`, `wifi`, `netreset`). Konsoldan çıkmak için `Ctrl+]`.
+Taklit sunucu `/?theme=dark&lang=tr&open=settings` gibi gösterim seçeneklerini de alır; yukarıdaki ekran görüntüleri bunlarla çekildi. `main/web/svg/` içinde bir SVG'yi değiştirince `python3 main/web/embed_svg.py` çalıştır, SVG `index.html`'e gömülür. Sonra firmware'i yeniden derle.
+
+Ayrıca bir USB seri konsol var (`./monitor.sh`, sonra `help`): `pair`, `on`, `off`, `dim`, `temp`, `list`, `assign`, `ip`, `wifi`, `netreset`.
 
 ## Dosyalar
 
-- `main/zigbee.c`: Zigbee coordinator, oda grupları, kumanda bind işlemi
-- `main/web.c`: WiFi, kurulum ağı (captive portal), mDNS, HTTP API, BOOT tuşu
-- `main/web/index.html`: web arayüzü, Türkçe ve İngilizce (Ayarlar → Görünüm'de dil ve tema; seçim tarayıcıda saklanır). Renk paleti ve düzen önerileri **Codex**'ten geldi.
-- `main/web/svg/`: oda çizimleri (oda kartında çizime basıp seçilir; "Otomatik" seçiliyse oda adına göre gelir: salon, mutfak, yatak, banyo, çocuk, ofis, hol, diğer), logo (lamba ve kumanda bir arada; ampul ve ışın çizimi bilerek kullanılmadı), boş durum çizimi ve simgeler. Hepsini **Codex** çizdi. Işığı açık odada lambanın `.lit` kısmı parlar. Bir SVG değişince `python3 main/web/embed_svg.py` çalıştır, dosyalar `index.html` içine gömülür.
-- `main/console.c`: USB seri konsol
-- `main/events.c`: sayfada gösterilen olay listesi
-- `main/clock.c`: internetten saat (SNTP) ve saat dilimi
+```
+main/
+  main.c          açılış, anten anahtarı
+  zigbee.c        coordinator, oda grupları, kumanda bağlama, bildirimler, gece modu
+  web.c           WiFi, kurulum ağı + captive DNS, mDNS, HTTP API, BOOT tuşu
+  led.c           durum LED'i desenleri
+  clock.c         SNTP saati ve saat dilimi
+  events.c        sayfada gösterilen olay listesi
+  console.c       USB seri konsol
+  web/index.html  bütün web arayüzü (firmware'e gömülür)
+  web/svg/        çizimlerin ve simgelerin kaynak SVG'leri
+  web/embed_svg.py
+tools/mock_server.py
+docs/             ekran görüntüleri, README görselleri, Türkçe README
+```
 
 ## Bilinen sınırlar
 
-- Kumandanın sol/sağ ok tuşları IKEA'ya özel komut gönderir ve lamba bunu grup üzerinden anlamaz. Bu yüzden ok tuşları doğrudan ESP'ye bağlanır, ESP de odaya renk sıcaklığı komutu gönderir (sol daha sıcak, sağ daha soğuk: 2200 / 2700 / 4000 K). Ok tuşları yalnızca ESP açıkken çalışır. Bağlantı kopmuşsa **Cihazlar** bölümünde kumandanın **Oklar** düğmesine bas ve 30 saniye içinde kumandanın bir tuşuna bas.
-- WiFi ve Zigbee aynı radyoyu paylaşır. Zigbee kanal 25'te çalışır, WiFi ile en az çakışan kanallardan biridir.
+- IKEA kumandalarının ok tuşları IKEA'ya özel bir Scenes komutu gönderir ve lambalar bunu grup üzerinden uygulamaz. Bu yüzden ok tuşları ESP'ye gider ve yalnızca ESP açıkken çalışır. Aç/kapat ve kısma ESP olmadan da çalışır.
+- Lambaları yalnızca bir coordinator yönetebilir. Lambaları burada eşlemek onları IKEA ağ geçidinden ya da başka bir merkezden çıkarır.
+- Renk sıcaklığında üç hazır ayar var. RGB lambalar desteklenmiyor.
+
+## Emeği geçenler
+
+- Renk paleti, oda çizimleri, simgeler, logo ve banner görseli **OpenAI Codex** ile tasarlandı.
+- Firmware ve web sayfası **Claude Code** ile yazıldı.
+- Espressif'in [esp-zigbee-sdk](https://github.com/espressif/esp-zigbee-sdk) ve [ESP-IDF](https://github.com/espressif/esp-idf) projeleri üzerine kurulu.
+
+IKEA ve TRÅDFRI, Inter IKEA Systems B.V.'nin ticari markalarıdır. Bu bağımsız bir hobi projesidir; IKEA ile bağlantısı yoktur ve IKEA tarafından desteklenmemektedir.
+
+## Lisans
+
+[MIT](../LICENSE) © 2026 Melih Karakelle
