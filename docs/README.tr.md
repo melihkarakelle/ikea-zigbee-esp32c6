@@ -118,7 +118,53 @@ flowchart LR
 
 ## Başlarken
 
-### 1. Derle ve yükle
+### 1. Firmware'i karta yükle
+
+İstersen hazır firmware'i doğrudan yükle (ESP-IDF gerekmez), istersen kendin derle.
+
+Hazır dosyalar [`firmware/`](../firmware/) klasöründe ve [son sürümün](https://github.com/melihkarakelle/ikea-zigbee-esp32c6/releases/latest) eklerinde:
+
+| Dosya | Adres | Ne için |
+|---|---|---|
+| `ikea-zigbee-esp32c6-v1.0.0-full.bin` | `0x0` | **İlk kurulum.** Bootloader, bölüm tablosu ve uygulama tek dosyada. Kayıtlı ayarların alanını da (WiFi, odalar, cihazlar) siler. |
+| `ikea-zigbee-esp32c6-v1.0.0-update.bin` | `0x10000` | **Bu projeyi zaten çalıştıran bir kartı güncellemek.** Yalnızca uygulama yazılır; WiFi, odalar, eşlenmiş lambalar ve kumandalar kalır. |
+| `SHA256SUMS.txt` | | Doğrulama: `shasum -a 256 -c SHA256SUMS.txt` |
+
+Hazır firmware'in içinde WiFi yok: ilk açılışta kurulum ağını açar (2. adıma bak).
+
+**Seri port adları:** macOS `/dev/cu.usbmodem…`, Linux `/dev/ttyACM0`, Windows `COM3` (Aygıt Yöneticisi'ne bak). Kart bulunamazsa USB kablosunu takarken **BOOT** tuşunu basılı tut, kart yükleme moduna geçer. Sonra tekrar dene.
+
+#### Seçenek A: tarayıcıdan (Chrome ya da Edge)
+
+1. Espressif'in web yükleyicisini aç: <https://espressif.github.io/esptool-js/>
+2. Baud hızını `460800` yap, **Connect**'e bas ve XIAO'nun seri portunu seç.
+3. İlk kurulumda önce **Erase Flash**'a bas (isteğe bağlı, temiz bir başlangıç sağlar), sonra `ikea-zigbee-esp32c6-v1.0.0-full.bin` dosyasını `0x0` adresine ekle. Güncellemede `ikea-zigbee-esp32c6-v1.0.0-update.bin` dosyasını `0x10000` adresine ekle ve silme **yapma**.
+4. **Program**'a bas, bitmesini bekle, sonra kartın **RESET** tuşuna bas ya da kabloyu çıkarıp tak.
+
+#### Seçenek B: komut satırından esptool ile
+
+[esptool](https://docs.espressif.com/projects/esptool/) Espressif'in resmi yükleme aracı (Python 3.8+):
+
+```bash
+python3 -m pip install --upgrade esptool
+```
+
+İlk kurulum, temiz flash ile. Bu her şeyi siler, varsa eski Zigbee ağını da:
+
+```bash
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 erase_flash
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 write_flash 0x0 firmware/ikea-zigbee-esp32c6-v1.0.0-full.bin
+```
+
+Güncelleme; WiFi, odalar ve eşlenmiş cihazlar kalır:
+
+```bash
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 write_flash 0x10000 firmware/ikea-zigbee-esp32c6-v1.0.0-update.bin
+```
+
+esptool iş bitince kartı yeniden başlatır. Windows'ta `py -m esptool` ve `COM3` gibi bir port kullan.
+
+#### Seçenek C: kendin derle
 
 [ESP-IDF v5.4](https://docs.espressif.com/projects/esp-idf/en/v5.4/esp32c6/get-started/) gerekli. Zigbee ve mDNS kütüphaneleri ilk derlemede component manager tarafından indirilir.
 
@@ -127,10 +173,20 @@ git clone https://github.com/melihkarakelle/ikea-zigbee-esp32c6.git
 cd ikea-zigbee-esp32c6
 . ~/esp/esp-idf/export.sh
 idf.py set-target esp32c6
+idf.py build
 idf.py -p /dev/cu.usbmodem2101 flash monitor   # port adı sende farklı olabilir
 ```
 
-İstersen ev WiFi'sini firmware'e gömebilirsin: `main/wifi_secret.example.h` dosyasını `main/wifi_secret.h` olarak kopyala ve doldur. Bu dosya git'e girmez. Dosya yoksa kart kurulum modunda açılır.
+Kendi derlediğin firmware'i `idf.py flash` yerine doğrudan esptool ile yüklemek için ESP-IDF'in `build/` içine yazdığı dosya listesini kullan:
+
+```bash
+cd build
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 write_flash @flash_args
+```
+
+Ya da sürüm dosyaları gibi tek bir dosya üret: `build/` içinde `python3 -m esptool --chip esp32c6 merge_bin -o full.bin @flash_args` çalıştır ve `0x0` adresine yükle.
+
+İstersen ev WiFi'sini firmware'e gömebilirsin: `main/wifi_secret.example.h` dosyasını `main/wifi_secret.h` olarak kopyala ve doldur. Bu dosya git'e girmez. Dosya yoksa kart kurulum modunda açılır. WiFi'n gömülü olarak derlenmiş bir firmware dosyasını kimseyle paylaşma.
 
 ### 2. WiFi'ye bağla
 
@@ -226,6 +282,7 @@ main/
   web/svg/        çizimlerin ve simgelerin kaynak SVG'leri
   web/embed_svg.py
 tools/mock_server.py
+firmware/         esptool için hazır firmware (tam + güncelleme)
 docs/             ekran görüntüleri, README görselleri, Türkçe README
 ```
 

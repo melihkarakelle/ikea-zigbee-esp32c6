@@ -1,0 +1,2 @@
+ceddc073ce4a442a5b56d06ea9a930c8f8e14031e429b46cb6891fa507c28e16  ikea-zigbee-esp32c6-v1.0.0-full.bin
+6f2ac420229400a49629f0c332a1bbbf26cfd32e2746d272070a7891df4cbb37  ikea-zigbee-esp32c6-v1.0.0-update.bin

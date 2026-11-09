@@ -118,7 +118,53 @@ flowchart LR
 
 ## Getting started
 
-### 1. Build and flash
+### 1. Put the firmware on the board
+
+You can either flash the ready-made firmware (no ESP-IDF needed) or build it yourself.
+
+The pre-built files are in [`firmware/`](firmware/) and attached to the [latest release](https://github.com/melihkarakelle/ikea-zigbee-esp32c6/releases/latest):
+
+| File | Flash at | Use it for |
+|---|---|---|
+| `ikea-zigbee-esp32c6-v1.0.0-full.bin` | `0x0` | **First install.** Bootloader, partition table and app in one image. It also wipes the saved settings area (WiFi, rooms, devices). |
+| `ikea-zigbee-esp32c6-v1.0.0-update.bin` | `0x10000` | **Updating a board that already runs this project.** Only the app is written, so WiFi, rooms, paired lamps and remotes are kept. |
+| `SHA256SUMS.txt` | | Checksums: `shasum -a 256 -c SHA256SUMS.txt` |
+
+The pre-built firmware has no WiFi built in: on first start it opens the setup network (see step 2).
+
+**Serial port names:** macOS `/dev/cu.usbmodem…`, Linux `/dev/ttyACM0`, Windows `COM3` (check Device Manager). If the board is not found, hold **BOOT** while plugging in the USB cable to put it into download mode, then try again.
+
+#### Option A: in the browser (Chrome or Edge)
+
+1. Open Espressif's web flasher: <https://espressif.github.io/esptool-js/>
+2. Set the baud rate to `460800`, click **Connect** and pick the XIAO's serial port.
+3. For a first install, click **Erase Flash** (optional but gives a clean start), then add the file `ikea-zigbee-esp32c6-v1.0.0-full.bin` at address `0x0`. For an update, use `ikea-zigbee-esp32c6-v1.0.0-update.bin` at `0x10000` and **don't** erase.
+4. Click **Program**, wait for it to finish, then press the board's **RESET** button or unplug and replug it.
+
+#### Option B: with esptool on the command line
+
+[esptool](https://docs.espressif.com/projects/esptool/) is Espressif's official flashing tool (Python 3.8+):
+
+```bash
+python3 -m pip install --upgrade esptool
+```
+
+First install, with a clean flash. This erases everything, including any earlier Zigbee network:
+
+```bash
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 erase_flash
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 write_flash 0x0 firmware/ikea-zigbee-esp32c6-v1.0.0-full.bin
+```
+
+Update, keeping WiFi, rooms and paired devices:
+
+```bash
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 write_flash 0x10000 firmware/ikea-zigbee-esp32c6-v1.0.0-update.bin
+```
+
+esptool resets the board when it is done. On Windows use `py -m esptool` and a port such as `COM3`.
+
+#### Option C: build it yourself
 
 You need [ESP-IDF v5.4](https://docs.espressif.com/projects/esp-idf/en/v5.4/esp32c6/get-started/). The Zigbee and mDNS components are downloaded by the component manager on the first build.
 
@@ -127,10 +173,20 @@ git clone https://github.com/melihkarakelle/ikea-zigbee-esp32c6.git
 cd ikea-zigbee-esp32c6
 . ~/esp/esp-idf/export.sh
 idf.py set-target esp32c6
+idf.py build
 idf.py -p /dev/cu.usbmodem2101 flash monitor   # your port name will differ
 ```
 
-Optional: to build your home WiFi into the firmware, copy `main/wifi_secret.example.h` to `main/wifi_secret.h` and fill it in. That file is git-ignored. Without it the board starts in setup mode.
+To flash your own build with plain esptool instead of `idf.py flash`, use the file list ESP-IDF writes into `build/`:
+
+```bash
+cd build
+python3 -m esptool --chip esp32c6 --port /dev/cu.usbmodem2101 write_flash @flash_args
+```
+
+Or make one image like the release files with `python3 -m esptool --chip esp32c6 merge_bin -o full.bin @flash_args` (run inside `build/`) and flash it at `0x0`.
+
+Optional: to build your home WiFi into the firmware, copy `main/wifi_secret.example.h` to `main/wifi_secret.h` and fill it in. That file is git-ignored. Without it the board starts in setup mode. Don't share a firmware file built with your WiFi in it.
 
 ### 2. Connect it to your WiFi
 
@@ -226,6 +282,7 @@ main/
   web/svg/        source SVGs for the drawings and icons
   web/embed_svg.py
 tools/mock_server.py
+firmware/         pre-built images for esptool (full + update)
 docs/             screenshots, README images, Turkish README
 ```
 
