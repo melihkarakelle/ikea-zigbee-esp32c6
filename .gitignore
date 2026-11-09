@@ -1,0 +1,8 @@
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
+main/wifi_secret.h
+.DS_Store
+__pycache__/
+docs/media/raw/

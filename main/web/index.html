@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f7f3eb">
+<title>IKEA Işıklar</title>
+<style>
+/* Palette by Codex */
+:root{color-scheme:light;--bg:#f7f3eb;--card:#fffcf7;--text:#28241f;--muted:#665e53;--border:#ded5c7;--accent:#8a4b17;--on-accent:#fff;--accent-soft:#f8e3bd;--glow:#ffd27a;--ok:#226b4a;--danger:#a4382f}
+/* theme: follows the phone unless the page's theme button picked light or dark */
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#1c1a17;--card:#29251f;--text:#f4eadb;--muted:#b9ad9e;--border:#494135;--accent:#f6bc69;--on-accent:#2d1b08;--accent-soft:#49351e;--glow:#c98232;--ok:#86d9a6;--danger:#ff9b8e}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#1c1a17;--card:#29251f;--text:#f4eadb;--muted:#b9ad9e;--border:#494135;--accent:#f6bc69;--on-accent:#2d1b08;--accent-soft:#49351e;--glow:#c98232;--ok:#86d9a6;--danger:#ff9b8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:960px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0 16px}
+.clock{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.clock .ico{width:20px;height:20px;color:var(--accent)}
+.alert{margin:-6px 0 14px;padding:8px 12px;border:1px solid var(--danger);border-radius:12px;color:var(--danger);font-size:.9rem}
+.sig{display:inline-flex;align-items:flex-end;gap:2px;height:14px;margin-right:6px;vertical-align:-1px}
+.sig i{width:4px;border-radius:1px;background:var(--border)}
+.sig i.on{background:var(--ok)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.9rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.pref{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:14px}
+.pref>span:first-child{color:var(--muted);font-size:.9rem}
+.lang.big button{white-space:nowrap;padding:0 12px}
+#themeSw button{padding:0 10px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;color:var(--accent)}
+.logo svg{width:100%;height:100%;display:block}
+.logo .lit{opacity:1}
+h1{font-size:1.6rem;margin:0}
+h2{font-size:1.1rem;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+h2 .ico{color:var(--accent)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-basis:100%}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;padding:4px 10px;border-radius:99px;border:1px solid var(--border);color:var(--muted);background:var(--card)}
+.chip .ico{width:14px;height:14px}
+.chip.ok{color:var(--ok);border-color:currentColor}
+.chip.bad{color:var(--danger);border-color:currentColor}
+.lang{display:inline-flex;border:1px solid var(--border);border-radius:99px;overflow:hidden;background:var(--card)}
+.lang button{min-height:28px;padding:0 10px;border:0;border-radius:0;background:none;font-size:.8rem;color:var(--muted)}
+.lang button.sel{background:var(--accent);color:var(--on-accent)}
+.lang button .ico{width:15px;height:15px;vertical-align:-3px}
+.lang.big button{min-height:40px;padding:0 18px;font-size:.95rem}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.bar .ico{width:20px;height:20px}
+button,select,input{font:inherit;color:inherit}
+button{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer}
+.bar button{display:inline-flex;align-items:center;gap:8px}
+button:hover{border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:wait}
+button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.ghost{background:transparent}
+button.danger{color:var(--danger)}
+:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+select,input[type=text],input[type=password]{min-height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg);width:100%}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px}
+.ico{display:inline-block;width:18px;height:18px;flex:none}
+.ico svg{width:100%;height:100%;display:block}
+/* SVG illustrations by Codex: .lit glows when the room is on */
+.lit{fill:var(--glow);opacity:.2;transition:opacity .4s}
+.soft{fill:var(--accent-soft)}
+.room-head{display:flex;align-items:center;gap:12px}
+.scene{width:104px;flex:none;color:var(--muted);transition:color .4s}
+.scene svg{width:100%;height:auto;display:block}
+button.scene{min-height:0;padding:4px;border:1px dashed transparent;border-radius:12px;background:none;cursor:pointer}
+button.scene:hover{border-color:var(--border)}
+.picker{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--bg)}
+.picker .meta{margin-bottom:8px}
+.picker .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.picker button{min-height:0;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.75rem;color:var(--muted)}
+.picker button svg{width:100%;max-width:84px;height:auto;color:var(--accent)}
+.picker button .lit{opacity:.8}
+.picker button.sel{border:2px solid var(--accent);color:var(--text)}
+.picker .auto{grid-column:1/-1;min-height:40px;flex-direction:row;justify-content:center;font-size:.85rem}
+.card.on .scene{color:var(--accent)}
+.card.on .scene .lit{opacity:1;filter:drop-shadow(0 0 5px var(--glow))}
+.room-info{flex:1;min-width:0}
+.room-info .onoff{margin-top:8px}
+.room-name{font-weight:650;font-size:1.15rem;background:none;border:0;padding:0;min-height:0;text-align:left;cursor:text}
+.room-name:hover{text-decoration:underline dotted;text-underline-offset:4px}
+.meta{color:var(--muted);font-size:.85rem}
+.onoff{display:flex;gap:6px}
+.onoff button{min-width:64px}
+.onoff .on{background:var(--accent-soft);border-color:var(--glow)}
+.row{display:flex;align-items:center;gap:10px;margin-top:14px}
+.row label{display:flex;align-items:center;gap:6px;min-width:100px;color:var(--muted);font-size:.9rem}
+.row label .ico{color:var(--accent)}
+input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:44px}
+.pct{min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.temps{flex:1;min-width:0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{padding:0 6px;font-size:.9rem;line-height:1.1}
+.seg small{display:block;color:var(--muted);font-size:.72rem}
+.seg button.sel{border:2px solid var(--accent)}
+.grad{height:6px;border-radius:6px;margin-top:6px;background:linear-gradient(90deg,#ffb35c,#fff1d6,#dbe9ff)}
+section{margin-top:24px}
+details.card>summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:28px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary .ico{color:var(--accent);width:22px;height:22px}
+details.card>summary .meta{margin:0 auto 0 0;font-weight:400}
+details.card>summary::after{content:"▾";color:var(--muted)}
+details[open].card>summary::after{content:"▴"}
+details.card>summary+*{margin-top:14px}
+.empty{color:var(--muted);text-align:center;padding:28px 16px}
+.empty .art{width:180px;max-width:70%;margin:0 auto 10px;color:var(--accent)}
+.empty .art svg{width:100%;height:auto;display:block}
+.empty .art .lit{opacity:.9}
+.pair-live{border-color:var(--glow);box-shadow:0 0 0 4px var(--accent-soft)}
+.count{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+ol{padding-left:20px;margin:8px 0}
+ol li{margin:4px 0}
+.events{list-style:none;padding:0;margin:0;max-height:260px;overflow:auto;font-size:.9rem}
+.events li{padding:6px 0;border-top:1px solid var(--border)}
+.events time{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:8px}
+.dev{display:grid;grid-template-columns:auto 1fr minmax(120px,170px) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--border)}
+.dev .ico{width:26px;height:26px;color:var(--accent)}
+.dev .id{font-size:.8rem;color:var(--muted);word-break:break-all}
+@media (max-width:560px){.dev{grid-template-columns:auto 1fr}.dev select,.dev .onoff{grid-column:2}}
+.form{display:grid;gap:10px}
+.pw{display:flex;gap:6px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1}
+.night{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.night label{display:flex;align-items:center;gap:8px;min-height:36px;cursor:pointer}
+.night label .ico{color:var(--accent)}
+.night input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+.night select{width:auto;min-height:36px;padding:0 8px}
+.night .range{display:flex;align-items:center;gap:6px;margin-left:auto}
+.night .meta{flex-basis:100%}
+.sub{padding-top:16px;margin-top:16px;border-top:1px solid var(--border)}
+.sub:first-child{margin-top:0}
+.nrow{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:center;padding:10px;margin-top:10px;border:1px solid var(--border);border-radius:14px;transition:box-shadow .3s,border-color .3s}
+.nrow.flash{border-color:var(--glow);box-shadow:0 0 0 4px var(--accent-soft)}
+.nrow b{font-weight:650}
+.nrow label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.9rem;cursor:pointer}
+.nrow input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+.nrow .nsel{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.nrow select{width:auto;min-height:38px;padding:0 8px}
+.nrow .nsel span{color:var(--muted);font-size:.9rem}
+.night .edit{min-height:36px;padding:0 10px;margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:.85rem}
+.night .edit .ico{width:16px;height:16px;color:var(--accent)}
+.sub.pair-live{border:1px solid var(--glow);border-radius:14px;padding:14px;box-shadow:0 0 0 4px var(--accent-soft)}
+.sub.pair-live+.sub{border-top:0}
+#settings>summary{font-size:1.1rem}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand"><span class="logo" data-img="logo"></span><h1 data-i18n="title">IKEA Işıklar</h1></div>
+  <span class="clock" id="cTime"><i class="ico" data-img="clock"></i><span>--:--</span></span>
+</header>
+<div id="alert" class="alert hide"></div>
+
+<div id="setupFirst" class="card pair-live hide" style="margin-bottom:16px">
+  <h2 data-i18n="setupTitle">Önce WiFi'yi ayarla</h2>
+  <p class="meta" data-i18n-html="setupText"></p>
+  <div id="setupSlot"></div>
+</div>
+
+<div class="bar">
+  <button class="primary" data-all="off"><i class="ico" data-img="power"></i><span data-i18n="allOff">Tüm ışıkları kapat</span></button>
+  <button data-all="on"><i class="ico" data-img="sun"></i><span data-i18n="allOn">Tümünü aç</span></button>
+</div>
+
+<div id="rooms" class="grid"></div>
+
+<section>
+  <details class="card" id="settings">
+    <summary><i class="ico" data-img="gear"></i><span data-i18n="settings">Ayarlar</span> <span class="meta" data-i18n="settingsMeta"></span></summary>
+    <div>
+    <div id="nightCard" class="sub">
+      <h2><i class="ico" data-img="moon"></i><span data-i18n="night">Gece modu</span></h2>
+      <div class="meta" data-i18n="nightHelp"></div>
+      <div id="nightList"></div>
+    </div>
+
+    <div id="pairCard" class="sub">
+      <h2><i class="ico" data-img="plus"></i><span data-i18n="addDevice">Cihaz ekle</span></h2>
+      <div id="pairIdle" class="form">
+        <label class="meta" for="pairRoom" data-i18n="whichRoom">Hangi odaya?</label>
+        <select id="pairRoom"></select>
+        <input id="newRoomName" type="text" maxlength="18" data-i18n-ph="newRoomPh" class="hide">
+        <button class="primary" id="pairStart" data-i18n="pairStart">Eşlemeyi başlat (3 dk)</button>
+      </div>
+      <div id="pairLive" class="hide">
+        <div class="room-head" style="justify-content:space-between">
+          <div><div class="meta" id="pairFor"></div><div class="count" id="pairLeft">3:00</div></div>
+          <button id="pairStop" data-i18n="finish">Bitir</button>
+        </div>
+        <ol data-i18n-html="pairSteps"></ol>
+        <h2 style="margin-top:14px" data-i18n="joined">Katılan cihazlar</h2>
+        <ul class="events" id="pairEvents"></ul>
+      </div>
+    </div>
+
+    <div class="sub" id="devCard">
+      <h2><i class="ico" data-img="lamp"></i><span data-i18n="devices">Cihazlar</span> <span class="meta" id="devCount"></span></h2>
+      <div id="devices"></div>
+    </div>
+
+    <div class="sub" id="wifiCard">
+      <h2><i class="ico" data-img="wifi"></i><span data-i18n="wifiSettings">WiFi ayarları</span></h2>
+      <div id="wifiForm" class="form">
+        <div id="wifiNow"></div>
+        <div class="pw"><select id="ssidSel"><option value="" data-i18n="scanPick">Ağ seçmek için tara…</option></select><button id="scan" data-i18n="scan">Tara</button></div>
+        <input id="ssid" type="text" data-i18n-ph="ssidPh" autocomplete="off">
+        <div class="pw"><input id="pass" type="password" data-i18n-ph="passPh" autocomplete="off"><button id="showPw" type="button" data-i18n="show">Göster</button></div>
+        <button class="primary" id="saveWifi" data-i18n="saveWifi">Kaydet ve yeniden başlat</button>
+        <div class="meta" data-i18n="bootNote"></div>
+      </div>
+    </div>
+
+    <div class="sub">
+      <h2><i class="ico" data-img="mesh"></i><span>Zigbee</span></h2>
+      <div id="zbInfo"></div>
+    </div>
+
+    <div class="sub">
+      <h2><i class="ico" data-img="globe"></i><span data-i18n="appearance">Görünüm</span></h2>
+      <div class="pref"><span data-i18n="theme">Tema</span>
+        <span class="lang big" role="group" id="themeSw"><button data-theme-set="auto"><i class="ico" data-img="theme-auto"></i> <span data-i18n="themeAutoL"></span></button><button data-theme-set="light"><i class="ico" data-img="sun"></i> <span data-i18n="themeLightL"></span></button><button data-theme-set="dark"><i class="ico" data-img="moon"></i> <span data-i18n="themeDarkL"></span></button></span></div>
+      <div class="pref"><span data-i18n="language">Dil</span>
+        <span class="lang big" role="group" aria-label="Dil / Language"><button data-lang="tr">Türkçe</button><button data-lang="en">English</button></span></div>
+    </div>
+
+    <div class="sub">
+      <h2><i class="ico" data-img="list"></i><span data-i18n="events">Son olaylar</span></h2>
+      <ul class="events" id="events"></ul>
+    </div>
+    </div>
+  </details>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const HOURS=sel=>[...Array(24).keys()].map(h=>`<option value="${h}"${h==sel?' selected':''}>${String(h).padStart(2,'0')}:00</option>`).join('');
+/* SVG illustrations and icons by Codex (source files in main/web/svg/) */
+const IMG=/*IMG*/{"empty":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 160 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M23 85h114M68 85V49m24 36V49M65 85h30\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M57 47c1-16 10-26 23-26s22 10 23 26z\"/><path d=\"M57 47c1-16 10-26 23-26s22 10 23 26zM80 21V12M64 53h32M80 58v5m-10 5c6-5 14-5 20 0m-14 6c3-2 6-2 9 0\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M34 25l2 5 5 2-5 2-2 5-2-5-5-2 5-2zm92 15 2 4 4 2-4 2-2 4-2-4-4-2 4-2z\"/><path d=\"M34 25l2 5 5 2-5 2-2 5-2-5-5-2 5-2zm92 15 2 4 4 2-4 2-2 4-2-4-4-2 4-2zM119 18v7m-3-3h7M48 66v6m-3-3h6\"/></svg>","clock":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 6v6l4 2\"/></svg>","gear":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 2h4l.5 2.3 1.6.7 2-1.1 2.8 2.8-1.1 2 .7 1.6L22 10v4l-2.3.5-.7 1.6 1.1 2-2.8 2.8-2-1.1-1.6.7L14 22h-4l-.5-2.3-1.6-.7-2 1.1-2.8-2.8 1.1-2-.7-1.6L2 14v-4l2.3-.5.7-1.6-1.1-2 2.8-2.8 2 1.1 1.6-.7z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>","globe":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18M12 3c-3 2.5-4.5 5.5-4.5 9S9 18.5 12 21m0-18c3 2.5 4.5 5.5 4.5 9S15 18.5 12 21\"/></svg>","lamp":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path class=\"lit\" d=\"M8 4h8l4 9H4z\"/><path d=\"M4 13h16m-8 0v7m-5 0h10\"/></svg>","list":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 5h12M9 12h12M9 19h12\"/><circle cx=\"4\" cy=\"5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"4\" cy=\"12\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"4\" cy=\"19\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/></svg>","mesh":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7.5 16 6m-8 3 3 8m6-8-5 8\"/><circle cx=\"6\" cy=\"7\" r=\"3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"12\" cy=\"19\" r=\"3\"/></svg>","moon":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.5 15.4A9 9 0 0 1 8.6 3.5 9 9 0 1 0 20.5 15.4zM18 3v4m-2-2h4M22 8v2m-1-1h2\"/></svg>","plus":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 4v16M4 12h16\"/></svg>","power":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2v10M6.2 5.5a9 9 0 1 0 11.6 0\"/></svg>","remote-round":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\"/><path d=\"M12 5v2m0 10v2M5 12h2m10 0h2\"/></svg>","remote-square":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 2h10a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z\"/><path d=\"m12 5-2 2m2-2 2 2m-2 12-2-2m2 2 2-2M5.5 12l2-2m-2 2 2 2m11-2-2-2m2 2-2 2\"/><circle cx=\"12\" cy=\"12\" r=\"1.4\"/></svg>","sun":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4m0-14.2-1.4 1.4M6.3 17.7l-1.4 1.4\"/></svg>","temp":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2v2m-8 8H2m5-5L5.5 5.5M12 8a4 4 0 0 0-4 4\"/><path d=\"M15 5c1 4-3 5-1 9 1.4-1 2-2.3 2-4 3 2 4 4.4 4 7a5 5 0 0 1-10 0c0-2 1-3.5 2.5-5\"/><path d=\"M15 21c-1-1-1.2-2.2-.5-3.5\"/></svg>","wifi":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2 8a15 15 0 0 1 20 0M5 11.5a10 10 0 0 1 14 0M8.5 15a5 5 0 0 1 7 0\"/><circle cx=\"12\" cy=\"19\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/></svg>","logo":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path class=\"lit\" d=\"M8 7h8l5 10H3z\"/><path d=\"M12 2v5M3 17h18\"/><circle class=\"soft\" cx=\"23\" cy=\"23\" r=\"7.5\"/><circle cx=\"23\" cy=\"23\" r=\"1.2\"/><path d=\"M23 18.5v1.3m0 6.4v1.3m-4.5-4.5h1.3m6.4 0h1.3\"/></svg>","room-bath":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M16 51h82l-4 12c-1 3-4 5-7 5H29c-4 0-7-2-8-5z\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M20 52h74l-4 10H25z\"/><path d=\"M26 68v2m61-2v2M21 51v-5c0-4 3-7 7-7h5m-5 0v-4m-5 0h10M76 17h29v29H76zM81 22h19v19H81zM90 30c4 1 5 4 4 7\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M50 18h15l-2 8H52z\"/><path d=\"M57.5 9v9M50 18h15l-2 8H52zM54 29h7\"/></svg>","room-bedroom":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M18 44h70v18H18zM18 62v7m70-7v7\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M21 45h64v16H21z\"/><path d=\"M18 43V30c0-3 3-5 6-5h57c4 0 7 2 7 5v13M26 36h24v9H26zM56 36h24v9H56zM14 61h78\"/><path d=\"M95 49h18v13H95zm4 13v7m10-7v7\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M94 42l4-11h12l4 11z\"/><path d=\"M94 42l4-11h12l4 11zM104 31v-8m-3 0h6M100 46h8\"/></svg>","room-generic":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M16 21h47v39H16zM39.5 21v39M16 40h47M22 30l9-5m21 19 6-4M75 68h32M83 68V52h16v16\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M17 22h45v37H17z\"/><path d=\"M39.5 22v37M17 40h45M23 31l8-5m22 18 5-4\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M79 27h29l-5 11H84z\"/><path d=\"M93.5 9v18M79 27h29l-5 11H84zM86 42h15\"/></svg>","room-hall":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M22 68V22h45v46M28 29h33v39M53 47h3M74 68V34h27v34M80 40h15v22H80\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M29 30h31v37H29z\"/><path d=\"M15 69h98M75 58h25M85 58v10\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M78 20h26l-4 10H82z\"/><path d=\"M91 9v11M78 20h26l-4 10H82zM85 34h12M72 25h-4m42 0h-4\"/></svg>","room-kids":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M14 34h68v28H14zM14 48h68M18 62v7m60-7v7M14 35V24h68v11M30 28h20v7m9-7h17v7M25 57h30m20-9v14\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M17 49h62v12H17z\"/><path d=\"M87 68h21l-10-17zM91 65h13M90 37l4-3 4 3-2-5 4-3h-5l-1-5-2 5h-5l4 3z\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M104 14l2 5 5 1-4 4 1 5-4-2-5 2 1-5-4-4 6-1z\"/><path d=\"M104 14l2 5 5 1-4 4 1 5-4-2-5 2 1-5-4-4 6-1z\"/></svg>","room-kitchen":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M16 38h88v30H16zM16 48h88M57 48v20M19 33h83M82 53h13m-10 0v10m8-10v10\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M23 38h34v10H23z\"/><path d=\"M25 43h30M36 28v5m-4-5h9\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M28 24h21l-3 9H31zM69 24h21l-3 9H72z\"/><path d=\"M38 10v14m41-14v14M28 24h21l-3 9H31zM69 24h21l-3 9H72zM35 36h7m34 0h7\"/></svg>","room-living":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M19 54V34h30v20M24 39h20\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M37 48c0-3 3-6 6-6h32c3 0 6 3 6 6v15H37z\"/><path d=\"M37 53h44M42 63v5m34-5v5M37 51c-6-3-9 0-9 5v7h61v-7c0-5-3-8-8-5\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M93 31c0-7 5-12 11-12s11 5 11 12l-3 6H96z\"/><path d=\"M93 31c0-7 5-12 11-12s11 5 11 12l-3 6H96zM104 37v31m-8 0h16M104 14v-4m-15 19h-4m34 0h-3\"/></svg>","room-office":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 80\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 69h104M15 42h78v6H15zM22 48v21m64-21v21M25 58h30v11H25zM69 52h15v11H69zM67 63v6m-5 0h22\"/><path class=\"soft\" fill=\"var(--accent-soft)\" d=\"M25 58h30v10H25z\"/><path d=\"M32 38h22M38 38V25h30v17H38M42 29h22v9H42\"/><path class=\"lit\" fill=\"var(--glow)\" d=\"M89 24l17 5-9 9-12-8z\"/><path d=\"M89 24l17 5-9 9-12-8zM85 30l-9 12m9-12-5-8m-4 20h-8m32-4v4\"/></svg>"}/*END*/;
+IMG.edit='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+IMG['theme-auto']='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>';
+const img=k=>IMG[k]||'';
+/* theme: auto (phone setting), light or dark; kept per browser */
+let theme='auto';try{theme=localStorage.getItem('theme')||'auto'}catch(e){}
+function applyTheme(){
+  if(theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=theme;
+  const dark=theme==='dark'||(theme==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelector('meta[name=theme-color]').content=dark?'#1c1a17':'#f7f3eb';
+  document.querySelectorAll('[data-theme-set]').forEach(b=>b.classList.toggle('sel',b.dataset.themeSet===theme));
+}
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+
+/* ---------- languages ---------- */
+const L={
+tr:{title:"IKEA Işıklar",setupTitle:"Önce WiFi'yi ayarla",
+setupText:"Kutu şu an kendi kurulum ağını yayınlıyor. Evdeki WiFi'yi seç, şifreyi yaz. Kaydedince yeniden başlar ve evdeki ağdan <b>http://ikea.local</b> adresinde açılır.",
+allOff:"Tüm ışıkları kapat",allOn:"Tümünü aç",settings:"Ayarlar",settingsMeta:"Gece modu · cihazlar · WiFi · görünüm · olaylar",language:"Dil",appearance:"Görünüm",theme:"Tema",themeAutoL:"Telefona göre",themeLightL:"Açık",themeDarkL:"Koyu",
+sigLabel:"Sinyal",sigText:"{0} ({1} dBm)",sigGreat:"çok iyi",sigGood:"iyi",sigFair:"orta",sigWeak:"zayıf",kvState:"Durum",isConnected:"Bağlı",kvIp:"IP adresi",kvChannel:"Kanal",kvPan:"PAN ID",kvDevices:"Cihaz",zbRun:"Çalışıyor",zbAp:"WiFi ayarlanınca başlar",
+addDevice:"Cihaz ekle",whichRoom:"Hangi odaya?",newRoomPh:"Yeni odanın adı, ör. Salon",pairStart:"Eşlemeyi başlat (3 dk)",finish:"Bitir",
+pairSteps:"<li>Odadaki lambaların duvar anahtarını <b>6 kez</b> kapatıp aç. Lamba yanıp söner.</li><li>Lambalar listede görünsün, sonra kumandayı lambaya yakın tut.</li><li>Kumandanın arkasındaki küçük eşleme tuşuna <b>5 saniye içinde 4 kez</b> bas.</li><li>\"Kumanda odaya bağlandı\" yazınca <b>Bitir</b>'e bas.</li>",
+joined:"Katılan cihazlar",devices:"Cihazlar",wifiSettings:"WiFi ayarları",scanPick:"Ağ seçmek için tara…",scan:"Tara",scanning:"Taranıyor…",
+ssidPh:"Ağ adı (SSID)",passPh:"Şifre",show:"Göster",hide:"Gizle",saveWifi:"Kaydet ve yeniden başlat",
+bootNote:"WiFi'yi sıfırlamak için kartın üstündeki BOOT tuşunu 5 saniye basılı tut.",events:"Son olaylar",
+setupMode:"Kurulum modu",wifiWait:"WiFi bağlantısı yok",zbStart:"Zigbee başlıyor…",noConn:"ESP'ye ulaşılamıyor",
+apNow:"Şu an kurulum ağı yayınlanıyor.",connected:"Bağlı · {0}",connecting:"WiFi ağına bağlanılıyor…",
+room:"Oda {0}",noRooms:"Henüz oda yok. Aşağıda <b>Ayarlar → Cihaz ekle</b> ile ilk odanı oluştur.",isOn:"Açık",isOff:"Kapalı",
+counts:"{0} lamba · {1} kumanda",rename:"Adı değiştir",on:"Aç",off:"Kapat",brightness:"Parlaklık",colour:"Renk",
+warm:"Sıcak",natural:"Doğal",cool:"Soğuk",themeAuto:"Tema: telefona göre",themeLight:"Tema: açık",themeDark:"Tema: koyu",themeGroup:"Tema",pickTitle:"Bu oda için çizim seç",pickTip:"Çizimi değiştir",pickAuto:"Otomatik (oda adına göre)",
+sc_living:"Salon",sc_kitchen:"Mutfak",sc_bedroom:"Yatak odası",sc_bath:"Banyo",sc_kids:"Çocuk odası",sc_office:"Çalışma",sc_hall:"Hol",sc_generic:"Diğer",night:"Gece modu",nStart:"Başlangıç",nEnd:"Bitiş",
+nightOff:"Kapalı",edit:"Düzenle",nightEdit:"Gece modunu ayarla",nightActive:"Açık",minutes:"{0} dk",afterMin:"sonra",dimTo:"Kısılacağı seviye",dimToEnd:"",noRoomsShort:"Henüz oda yok.",
+nightHelp:"Seçilen saatlerde açık kalan ışık, seçilen süre sonunda seçilen seviyeye kısılır. Işık kapanmaz, kapalı ışık açılmaz.",
+newRoom:"+ Yeni oda…",pairOpen:"Eşleme açık: {0}",nDev:"{0} cihaz",noDev:"Henüz eşlenmiş cihaz yok.",noRoom:"Oda yok",
+remote:"Kumanda",lamp:"Lamba",rebindTip:"Kumandayı odaya ve ESP’ye yeniden bağla",rebind:"Yeniden bağla",forget:"Unut",
+failed:"Olmadı: {0}",connErr:"Bağlantı hatası",err:"Hata",saved:"Kaydedildi",nightSaved:"Gece modu kaydedildi",nightOffT:"Gece modu kapatıldı",
+allOffT:"Tüm ışıklar kapatıldı",allOnT:"Tüm ışıklar açıldı",nameNew:"Yeni odaya bir ad ver",pairClosed:"Eşleme kapatıldı",
+moved:"Taşındı. Kumandaysa önce bir tuşuna bas, olmadıysa tekrar seç.",pressRemote:"Şimdi kumandanın herhangi bir tuşuna bas (30 sn)",
+confirmForget:"Cihaz #{0} listeden silinsin mi? Cihaz ağdan atılmaz, sadece listeden çıkar.",removed:"Silindi",
+scanFail:"Tarama olmadı",found:"{0} ağ bulundu, seç…",needSsid:"Ağ adını yaz",
+savedTitle:"Kaydedildi",savedText:"Kutu yeniden başlıyor. Telefonunu/bilgisayarını tekrar evdeki <b>{0}</b> ağına bağla ve <b>http://ikea.local</b> adresini aç.",
+savedHint:"ikea.local açılmazsa modemin cihaz listesinde \"ikea\" adlı cihazın IP adresine bak."},
+en:{title:"IKEA Lights",setupTitle:"Set up WiFi first",
+setupText:"The box is broadcasting its own setup network. Pick your home WiFi and enter the password. It restarts after saving and opens at <b>http://ikea.local</b> on your home network.",
+allOff:"All lights off",allOn:"All on",settings:"Settings",settingsMeta:"Night mode · devices · WiFi · appearance · events",language:"Language",appearance:"Appearance",theme:"Theme",themeAutoL:"Follow phone",themeLightL:"Light",themeDarkL:"Dark",
+sigLabel:"Signal",sigText:"{0} ({1} dBm)",sigGreat:"excellent",sigGood:"good",sigFair:"fair",sigWeak:"weak",kvState:"Status",isConnected:"Connected",kvIp:"IP address",kvChannel:"Channel",kvPan:"PAN ID",kvDevices:"Devices",zbRun:"Running",zbAp:"Starts once WiFi is set up",
+addDevice:"Add device",whichRoom:"Which room?",newRoomPh:"New room name, e.g. Living room",pairStart:"Start pairing (3 min)",finish:"Finish",
+pairSteps:"<li>Switch the room's lamps off and on at the wall <b>6 times</b>. The lamp blinks.</li><li>Wait until the lamps show in the list, then hold the remote close to a lamp.</li><li>Press the small pairing button on the back of the remote <b>4 times within 5 seconds</b>.</li><li>When \"Remote bound to the room group\" shows, press <b>Finish</b>.</li>",
+joined:"Joined devices",devices:"Devices",wifiSettings:"WiFi settings",scanPick:"Scan to pick a network…",scan:"Scan",scanning:"Scanning…",
+ssidPh:"Network name (SSID)",passPh:"Password",show:"Show",hide:"Hide",saveWifi:"Save and restart",
+bootNote:"To reset WiFi, hold the BOOT button on the board for 5 seconds.",events:"Recent events",
+setupMode:"Setup mode",wifiWait:"WiFi not connected",zbStart:"Zigbee starting…",noConn:"Cannot reach the ESP",
+apNow:"Broadcasting the setup network now.",connected:"Connected · {0}",connecting:"Connecting to WiFi…",
+room:"Room {0}",noRooms:"No rooms yet. Create your first room under <b>Settings → Add device</b> below.",isOn:"On",isOff:"Off",
+counts:"{0} lamps · {1} remotes",rename:"Rename",on:"On",off:"Off",brightness:"Brightness",colour:"Colour",
+warm:"Warm",natural:"Natural",cool:"Cool",themeAuto:"Theme: follow the phone",themeLight:"Theme: light",themeDark:"Theme: dark",themeGroup:"Theme",pickTitle:"Pick an illustration for this room",pickTip:"Change illustration",pickAuto:"Automatic (from the room name)",
+sc_living:"Living room",sc_kitchen:"Kitchen",sc_bedroom:"Bedroom",sc_bath:"Bathroom",sc_kids:"Kids' room",sc_office:"Office",sc_hall:"Hallway",sc_generic:"Other",night:"Night mode",nStart:"Start",nEnd:"End",
+nightOff:"Off",edit:"Edit",nightEdit:"Set up night mode",nightActive:"On",minutes:"{0} min",afterMin:"later, dim to",dimTo:"Dim level",dimToEnd:"",noRoomsShort:"No rooms yet.",
+nightHelp:"In the chosen hours, a light left on is dimmed to the chosen level after the chosen time. It is never turned off, and a light that is off is not turned on.",
+newRoom:"+ New room…",pairOpen:"Pairing open: {0}",nDev:"{0} devices",noDev:"No paired devices yet.",noRoom:"No room",
+remote:"Remote",lamp:"Lamp",rebindTip:"Re-bind the remote to the room and the ESP",rebind:"Re-bind",forget:"Forget",
+failed:"Failed: {0}",connErr:"Connection error",err:"Error",saved:"Saved",nightSaved:"Night mode saved",nightOffT:"Night mode off",
+allOffT:"All lights off",allOnT:"All lights on",nameNew:"Give the new room a name",pairClosed:"Pairing closed",
+moved:"Moved. For a remote, press one of its buttons first; if it fails, pick the room again.",pressRemote:"Now press any button on the remote (30 s)",
+confirmForget:"Remove device #{0} from the list? It is not removed from the network, only from the list.",removed:"Removed",
+scanFail:"Scan failed",found:"{0} networks found, pick one…",needSsid:"Enter the network name",
+savedTitle:"Saved",savedText:"The box is restarting. Reconnect your phone/computer to the home network <b>{0}</b> and open <b>http://ikea.local</b>.",
+savedHint:"If ikea.local does not open, look for the device named \"ikea\" in your router's device list and use its IP address."}};
+/* firmware messages are Turkish (ASCII); translate them for EN */
+const EVT_EN=[
+[/^(Yeni|Tekrar) (lamba|kumanda) katildi \(#(\d+)\)$/,(m,a,b,c)=>`${a=='Yeni'?'New':'Rejoined'}: ${b=='lamba'?'lamp':'remote'} (#${c})`],
+[/^BOOT tusu: .*$/,'BOOT button: clearing WiFi settings, entering setup mode'],
+[/^Cihaz #(\d+) listeden silindi$/,'Device #$1 removed from the list'],
+[/^Cihaz (\S+) komutu reddetti: kume (\S+) komut (\S+) durum (\S+)$/,'Device $1 rejected a command: cluster $2 cmd $3 status $4'],
+[/^Cihaz tablosu dolu$/,'Device table is full'],
+[/^Eslesme acik: (.*), (\d+) sn\..*$/,'Pairing open: $1, $2 s. Reset the lamps first, then the remote.'],
+[/^Eslesme kapandi$/,'Pairing closed'],
+[/^Gece modu: (.*) %1'e kisildi$/,'Night mode: $1 dimmed to 1%'],
+[/^Gece modu: (.*) %(\d+) seviyesine kisildi$/,'Night mode: $1 dimmed to $2%'],
+[/^Kumanda #(\d+) -> (.*) \(baglaniyor\.\.\.\)$/,'Remote #$1 -> $2 (binding...)'],
+[/^Kumanda #(\d+) hazir$/,'Remote #$1 ready'],
+[/^Kumanda #(\d+) tam baglanamadi.*$/,"Remote #$1 could not fully bind (asleep). Press 'Re-bind', then a button on the remote."],
+[/^Kumanda (\d+) lambaya tek tek baglandi$/,'Remote bound to $1 lamps one by one'],
+[/^Kumanda gruba baglanamadi: durum (\S+)$/,'Remote could not bind to the group: status $1'],
+[/^Kumanda grubu desteklemiyor.*$/,'Remote does not support groups, binding lamps one by one'],
+[/^Kumanda lamba #(\d+)'e baglanamadi: durum (\S+)(.*)$/,'Remote could not bind to lamp #$1: status $2$3'],
+[/^Kumanda odanin grubuna baglandi$/,'Remote bound to the room group'],
+[/^Kumanda ok tuslarini baglamayi reddetti: durum (\S+)$/,'Remote refused to bind the arrow keys: status $1'],
+[/^Kumanda yeniden baglaniyor.*$/,'Re-binding remote: press one of its buttons within 30 s'],
+[/^Kumandanin ok tuslari ESP'ye baglandi$/,'Remote arrow keys bound to the ESP'],
+[/^Kurulum agina bir cihaz baglandi$/,'A device joined the setup network'],
+[/^Kurulum modu: '(.*)' agina baglan, (.*)$/,"Setup mode: join the '$1' network, $2"],
+[/^Lamba #(\d+) -> (.*)$/,'Lamp #$1 -> $2'],
+[/^Lamba (\S+) gruba eklenemedi: durum (\S+)$/,'Lamp $1 could not join the group: status $2'],
+[/^Lamba (\S+) odanin grubunda \(grup (\d+)\)$/,'Lamp $1 is in the room group (group $2)'],
+[/^Saat dilimi ayarlandi: (.*)$/,'Time zone set: $1'],
+[/^Saat internetten alindi: (.*)$/,'Time synced from the internet: $1'],
+[/^WiFi ayari kaydedildi \((.*)\), yeniden baslatiliyor$/,'WiFi saved ($1), restarting'],
+[/^WiFi baglantisi koptu, tekrar deneniyor$/,'WiFi lost, retrying'],
+[/^WiFi bagli: (\S+)\s+ya da\s+(\S+)$/,'WiFi connected: $1 or $2'],
+[/^WiFi: (.*) agina baglaniliyor$/,'WiFi: connecting to $1'],
+[/^Yeni Zigbee agi kuruldu \(kanal (\d+)\)$/,'New Zigbee network formed (channel $1)'],
+[/^Zigbee agi hazir \(kanal (\d+)\)$/,'Zigbee network ready (channel $1)'],
+[/^Zigbee calismiyor, ag sifirlanamadi$/,'Zigbee is not running, network not reset'],
+[/^Zigbee, WiFi ayarlandiktan sonra baslayacak$/,'Zigbee will start after WiFi is set up'],
+[/^Zigbee agi hazir degil$/,'Zigbee network is not ready'],
+[/^Gecersiz deger$/,'Invalid value']];
+let lang='tr';
+try{lang=localStorage.getItem('lang')||''}catch(e){}
+if(!L[lang])lang=(navigator.language||'').toLowerCase().startsWith('tr')?'tr':'en';
+const t=(k,...a)=>(L[lang][k]??L.tr[k]??k).replace(/\{(\d)\}/g,(_,i)=>a[i]);
+const tmsg=s=>{if(lang!=='en')return s;for(const[re,r]of EVT_EN)if(re.test(s))return s.replace(re,r);return s};
+function applyLang(){
+  document.documentElement.lang=lang;document.title=t('title');
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(e=>e.innerHTML=t(e.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('sel',b.dataset.lang===lang));
+  document.querySelectorAll('[data-theme-set]').forEach(b=>{const k={auto:'themeAuto',light:'themeLight',dark:'themeDark'}[b.dataset.themeSet];b.title=t(k);b.setAttribute('aria-label',t(k))});
+  $('#themeSw').setAttribute('aria-label',t('themeGroup'));
+  $('#showPw').textContent=t($('#pass').type==='password'?'show':'hide');
+}
+
+/* browser time zone -> POSIX TZ for the ESP (DST rules included for common zones) */
+const TZMAP={'Europe/London':'GMT0BST,M3.5.0/1,M10.5.0','Europe/Dublin':'IST-1GMT0,M10.5.0,M3.5.0/1','Europe/Lisbon':'WET0WEST,M3.5.0/1,M10.5.0',
+'Europe/Istanbul':'<+03>-3','Europe/Berlin':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Amsterdam':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Paris':'CET-1CEST,M3.5.0,M10.5.0/3',
+'Europe/Brussels':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Madrid':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Rome':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Vienna':'CET-1CEST,M3.5.0,M10.5.0/3',
+'Europe/Zurich':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Stockholm':'CET-1CEST,M3.5.0,M10.5.0/3','Europe/Athens':'EET-2EEST,M3.5.0/3,M10.5.0/4','Europe/Helsinki':'EET-2EEST,M3.5.0/3,M10.5.0/4'};
+function browserTz(){
+  const z=Intl.DateTimeFormat().resolvedOptions().timeZone;if(TZMAP[z])return TZMAP[z];
+  const o=new Date().getTimezoneOffset();if(o%60)return null;return 'UTC'+(o>=0?'+':'-')+Math.abs(o/60);
+}
+let tzSent=false;
+const TEMPS=[[2200,'warm'],[2700,'natural'],[4000,'cool']];
+/* room illustration picked from the room name (Turkish and English words) */
+const SCENES=[[/salon|oturma|living|lounge|sitting/,'living'],[/mutfak|kitchen|yemek|dining/,'kitchen'],[/yatak|bed/,'bedroom'],
+[/banyo|bath|wc|tuvalet|toilet/,'bath'],[/çocuk|cocuk|bebek|kid|child|nursery|oyun/,'kids'],[/ofis|çalışma|calisma|office|study|desk/,'office'],
+[/hol|koridor|antre|giriş|giris|hall|entr|corridor/,'hall']];
+/* icon numbers stored on the ESP: 0 = auto, 1..8 = this list (keep the order) */
+const ICONS=['living','kitchen','bedroom','bath','kids','office','hall','generic'];
+const autoScene=name=>{const n=(name||'').toLocaleLowerCase('tr');for(const[re,k]of SCENES)if(re.test(n))return k;return 'generic'};
+const sceneFor=r=>img('room-'+(ICONS[(r.icon||0)-1]||autoScene(r.name)));
+let picking=0;
+let S=null,lastEv=0,pairEvFrom=0,ui={},busy=false,editing=false,evLog=[];
+
+function toast(m){const el=$('#toast');el.textContent=m;el.classList.add('show');clearTimeout(el._h);el._h=setTimeout(()=>el.classList.remove('show'),2600)}
+async function post(path,params){
+  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(params)});
+  const j=await r.json().catch(()=>({ok:false,error:t('connErr')}));
+  if(!j.ok)throw new Error(tmsg(j.error||t('err')));return j;
+}
+async function act(btn,fn,okMsg){
+  if(btn)btn.disabled=true;
+  try{await fn();if(okMsg)toast(okMsg)}catch(e){toast(t('failed',e.message))}
+  finally{if(btn)btn.disabled=false}
+}
+const cmd=(room,a,v)=>post('/api/cmd',{room,a,v:v??0});
+const roomName=r=>r.name||t('room',r.id);
+const pl=(n,w)=>lang==='en'&&n!=1?w+'s':w; /* English plural */
+const counts=(a,b)=>lang==='en'?`${a} ${pl(a,'lamp')} · ${b} ${pl(b,'remote')}`:t('counts',a,b);
+const fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const hh=h=>String(h).padStart(2,'0')+':00';
+const PCTS=[1,2,5,10,20,30,50],DELAYS=[1,2,5,10,15,30,60];
+const opts=(list,cur,fmt)=>(list.includes(cur)?list:list.concat(cur).sort((a,b)=>a-b)).map(v=>`<option value="${v}"${v==cur?' selected':''}>${fmt(v)}</option>`).join('');
+let nightHtml='',nightFocus=false;
+function renderNight(){
+  const html=S.rooms.length?S.rooms.map(r=>{const n=r.night||{on:true,from:0,to:4,pct:1,delay:5},p=n.pct||1,d=n.delay||5;
+    return `<div class="nrow" id="nrow-${r.id}" data-nroom="${r.id}"><b>${esc(roomName(r))}</b>
+      <label><input type="checkbox" data-n="on" ${n.on?'checked':''}>${t('nightActive')}</label>
+      <div class="nsel"><select data-n="from" aria-label="${t('nStart')}">${HOURS(n.from)}</select><span>–</span>
+      <select data-n="to" aria-label="${t('nEnd')}">${HOURS(n.to)}</select></div>
+      <div class="nsel"><select data-n="delay" aria-label="${t('afterMin')}">${opts(DELAYS,d,v=>t('minutes',v))}</select><span>${t('afterMin')}</span>
+      <select data-n="pct" aria-label="${t('dimTo')}">${opts(PCTS,p,v=>'%'+v)}</select>${t('dimToEnd')?`<span>${t('dimToEnd')}</span>`:''}</div></div>`}).join('')
+    :`<div class="empty">${t('noRoomsShort')}</div>`;
+  if(html===nightHtml||nightFocus)return;
+  nightHtml=html;$('#nightList').innerHTML=html;
+}
+function openNight(id){
+  $('#settings').open=true;
+  const row=$('#nrow-'+id);if(!row)return;
+  row.scrollIntoView({behavior:'smooth',block:'center'});
+  row.classList.add('flash');setTimeout(()=>row.classList.remove('flash'),1800);
+}
+const setAlert=m=>{const a=$('#alert');a.textContent=m||'';a.classList.toggle('hide',!m)};
+/* WiFi signal: 4 bars and a word */
+function signal(rssi){
+  const lv=rssi>=-55?4:rssi>=-67?3:rssi>=-75?2:1,w=['','sigWeak','sigFair','sigGood','sigGreat'][lv];
+  return `<span class="sig" aria-hidden="true">${[5,8,11,14].map((h,i)=>`<i class="${i<lv?'on':''}" style="height:${h}px"></i>`).join('')}</span>${t('sigText',t(w),rssi)}`;
+}
+const kv=rows=>'<dl class="kv">'+rows.map(([k,v])=>`<dt>${t(k)}</dt><dd>${v}</dd>`).join('')+'</dl>';
+
+function renderRooms(){
+  const el=$('#rooms');
+  if(!S.rooms.length){el.innerHTML=`<div class="card empty"><div class="art">${img('empty')}</div>${t('noRooms')}</div>`;return}
+  el.innerHTML=S.rooms.map(r=>{const u=ui[r.id]||{};
+    const on=r.on??u.on, dim=r.level??u.dim??80, n=r.night||{on:true,from:0,to:4};
+    const near=r.kelvin?TEMPS.reduce((a,b)=>Math.abs(b[0]-r.kelvin)<Math.abs(a[0]-r.kelvin)?b:a)[0]:u.temp;
+    return `
+  <div class="card${on===true?' on':''}" data-room="${r.id}">
+    <div class="room-head">
+      <button class="scene" data-pick="${r.id}" title="${t('pickTip')}" aria-label="${t('pickTip')}">${sceneFor(r)}</button>
+      <div class="room-info"><button class="room-name" data-rename="${r.id}" title="${t('rename')}">${esc(roomName(r))}</button>
+      <div class="meta">${on===true?`<b>${t('isOn')}</b> · `:on===false?t('isOff')+' · ':''}${counts(r.lamps,r.remotes)}</div>
+      <div class="onoff"><button data-a="on" class="${on===true?'on':''}">${t('on')}</button><button data-a="off" class="${on===false?'on':''}">${t('off')}</button></div></div>
+    </div>
+    ${picking===r.id?`<div class="picker"><div class="meta">${t('pickTitle')}</div><div class="opts">
+      <button class="auto${r.icon?'':' sel'}" data-icon="0">${t('pickAuto')}</button>
+      ${ICONS.map((k,i)=>`<button data-icon="${i+1}" class="${r.icon===i+1?'sel':''}">${img('room-'+k)}<span>${t('sc_'+k)}</span></button>`).join('')}</div></div>`:''}
+    <div class="row"><label><i class="ico">${img('sun')}</i>${t('brightness')}</label><input type="range" min="1" max="100" value="${dim}" data-dim aria-label="${t('brightness')}"><span class="pct">${dim}%</span></div>
+    <div class="row"><label><i class="ico">${img('temp')}</i>${t('colour')}</label><div class="temps"><div class="seg">${TEMPS.map(([k,n])=>`<button data-temp="${k}" class="${near===k?'sel':''}">${t(n)}<small>${k} K</small></button>`).join('')}</div><div class="grad"></div></div></div>
+    <div class="night" data-night>
+      <label><input type="checkbox" data-night-on ${n.on?'checked':''}><i class="ico">${img('moon')}</i>${t('night')}</label>
+      <button class="ghost edit" data-night-edit title="${t('nightEdit')}"><i class="ico">${img('edit')}</i>${t('edit')}</button>
+    </div>
+  </div>`}).join('');
+}
+
+function renderPair(){
+  const p=S.pairing,sel=$('#pairRoom'),cur=sel.value;
+  sel.innerHTML=S.rooms.map(r=>`<option value="${r.id}">${esc(roomName(r))}</option>`).join('')+`<option value="new">${t('newRoom')}</option>`;
+  sel.value=cur&&[...sel.options].some(o=>o.value==cur)?cur:(S.rooms.length?String(S.rooms[0].id):'new');
+  $('#newRoomName').classList.toggle('hide',sel.value!=='new');
+  $('#pairIdle').classList.toggle('hide',p.open);
+  $('#pairLive').classList.toggle('hide',!p.open);
+  $('#pairCard').classList.toggle('pair-live',p.open);
+  if(p.open&&!renderPair.wasOpen)$('#settings').open=true;renderPair.wasOpen=p.open;
+  if(p.open){const r=S.rooms.find(x=>x.id==p.room);$('#pairFor').textContent=t('pairOpen',r?roomName(r):t('room',p.room));$('#pairLeft').textContent=fmt(p.left)}
+}
+
+function renderDevices(){
+  $('#devCount').textContent=lang==='en'?`${S.devices.length} ${pl(S.devices.length,'device')}`:t('nDev',S.devices.length);
+  if(!S.devices.length){$('#devices').innerHTML=`<div class="empty">${t('noDev')}</div>`;return}
+  const opts=sel=>`<option value="0"${sel?'':' selected'} disabled>${t('noRoom')}</option>`+S.rooms.map(r=>`<option value="${r.id}"${r.id==sel?' selected':''}>${esc(roomName(r))}</option>`).join('');
+  $('#devices').innerHTML=S.devices.map(d=>`
+  <div class="dev" data-i="${d.i}"><i class="ico">${img(d.type==='remote'?'remote-round':'lamp')}</i>
+    <div><div>${d.type==='remote'?t('remote'):t('lamp')} #${d.i}</div><div class="id">${d.addr} · ${d.ieee}</div></div>
+    <select data-move aria-label="${t('room','')}">${opts(d.room)}</select>
+    <div class="onoff">${d.type==='remote'?`<button class="ghost" data-arrows title="${t('rebindTip')}">${t('rebind')}</button>`:''}<button class="ghost danger" data-forget>${t('forget')}</button></div>
+  </div>`).join('');
+}
+
+function renderStatus(){
+  const w=S.wifi;
+  $('#cTime').lastElementChild.textContent=S.time||'--:--';
+  if(!tzSent&&S.wifi.mode==='sta'){tzSent=true;const tz=browserTz();if(tz&&tz!==S.tz)post('/api/tz',{tz}).catch(()=>{})}
+  setAlert(w.mode==='ap'?'':!w.connected?t('wifiWait'):!S.ready?t('zbStart'):'');
+  $('#wifiNow').innerHTML=w.mode==='ap'?`<div class="meta">${t('apNow')}</div>`:w.connected?
+    kv([['kvState',t('isConnected')],['kvIp',esc(w.ip)]].concat(w.rssi?[['sigLabel',signal(w.rssi)]]:[])):`<div class="meta">${t('connecting')}</div>`;
+  $('#zbInfo').innerHTML=S.ready?kv([['kvState',t('zbRun')],['kvChannel',S.channel],['kvPan','0x'+S.pan.toString(16).toUpperCase().padStart(4,'0')],['kvDevices',S.devices.length]])
+    :`<div class="meta">${w.mode==='ap'?t('zbAp'):t('zbStart')}</div>`;
+  const setup=w.mode==='ap',form=$('#wifiForm');
+  $('#setupFirst').classList.toggle('hide',!setup);
+  if(setup&&form.parentElement.id!=='setupSlot')$('#setupSlot').appendChild(form);
+  if(!setup&&form.parentElement.id==='setupSlot')$('#wifiCard').appendChild(form);
+}
+
+function renderEvents(){
+  const li=e=>`<li><time>${fmt(e.t)}</time>${esc(tmsg(e.msg))}</li>`;
+  $('#events').innerHTML=evLog.slice().reverse().map(li).join('');
+  $('#pairEvents').innerHTML=S&&S.pairing.open?evLog.filter(e=>e.id>pairEvFrom).reverse().map(li).join(''):'';
+}
+
+async function refresh(){
+  try{
+    S=await (await fetch('/api/state')).json();
+    renderStatus();renderPair();renderDevices();renderNight();
+    if(!editing&&!busy)renderRooms();
+  }catch(e){setAlert(t('noConn'))}
+}
+
+async function pollEvents(){
+  try{
+    const evs=await (await fetch('/api/events?after='+lastEv)).json();
+    if(!evs.length)return;
+    for(const e of evs){lastEv=e.id;evLog.push(e)}
+    if(evLog.length>60)evLog=evLog.slice(-60);
+    renderEvents();
+  }catch(e){}
+}
+
+/* theme switch */
+document.querySelectorAll('[data-theme-set]').forEach(b=>b.addEventListener('click',()=>{
+  theme=b.dataset.themeSet;try{localStorage.setItem('theme',theme)}catch(e){}applyTheme();
+}));
+
+/* language switch */
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{
+  lang=b.dataset.lang;try{localStorage.setItem('lang',lang)}catch(e){}
+  applyLang();if(S){nightHtml='';renderStatus();renderPair();renderDevices();renderNight();renderRooms();renderEvents()}
+}));
+
+/* room card actions */
+$('#rooms').addEventListener('click',e=>{
+  const card=e.target.closest('[data-room]');if(!card)return;
+  const id=+card.dataset.room,b=e.target.closest('button');if(!b)return;
+  ui[id]=ui[id]||{};
+  if(b.dataset.nightEdit!==undefined){openNight(id);return}
+  if(b.dataset.pick){picking=picking===id?0:id;editing=!!picking;renderRooms();return}
+  if(b.dataset.icon!==undefined){const icon=+b.dataset.icon;picking=0;editing=false;
+    const r=S.rooms.find(x=>x.id==id);if(r)r.icon=icon;renderRooms();
+    act(null,()=>post('/api/room',{id,icon}),t('saved')).then(refresh);return}
+  if(b.dataset.a){act(b,()=>cmd(id,b.dataset.a),null).then(()=>{ui[id].on=b.dataset.a==='on';renderRooms();setTimeout(refresh,1200)})}
+  else if(b.dataset.temp){const k=+b.dataset.temp;act(b,()=>cmd(id,'temp',k)).then(()=>{ui[id].temp=k;renderRooms();setTimeout(refresh,1200)})}
+  else if(b.dataset.rename){
+    editing=true;const r=S.rooms.find(x=>x.id==id);
+    const inp=document.createElement('input');inp.type='text';inp.maxLength=18;inp.value=r.name;inp.placeholder=t('room',id);
+    b.replaceWith(inp);inp.focus();
+    const done=async save=>{editing=false;if(save&&inp.value!==r.name){await act(null,()=>post('/api/room',{id,name:inp.value.trim()}),t('saved'))}refresh()};
+    inp.addEventListener('keydown',ev=>{if(ev.key==='Enter')inp.blur();if(ev.key==='Escape'){inp.value=r.name;inp.blur()}});
+    inp.addEventListener('blur',()=>done(true));
+  }
+});
+$('#rooms').addEventListener('focusin',e=>{if(e.target.tagName==='SELECT')editing=true});
+$('#rooms').addEventListener('focusout',e=>{if(e.target.tagName==='SELECT')editing=false});
+$('#rooms').addEventListener('input',e=>{if(e.target.dataset.dim!==undefined){busy=true;e.target.nextElementSibling.textContent=e.target.value+'%'}});
+$('#rooms').addEventListener('change',e=>{
+  const nb=e.target.closest('[data-night]');
+  if(nb){
+    const id=+e.target.closest('[data-room]').dataset.room;
+    const r=S.rooms.find(x=>x.id==id),n=r.night||{from:0,to:4,pct:1};
+    const on=nb.querySelector('[data-night-on]').checked?1:0;
+    act(null,()=>post('/api/night',{id,on,from:n.from,to:n.to,pct:n.pct||1,delay:n.delay||5}),on?t('nightSaved'):t('nightOffT')).then(()=>{editing=false;refresh()});
+    return;
+  }
+  if(e.target.dataset.dim===undefined)return;
+  const id=+e.target.closest('[data-room]').dataset.room,v=+e.target.value;
+  ui[id]=ui[id]||{};ui[id].dim=v;ui[id].on=true;
+  act(null,()=>cmd(id,'dim',v)).finally(()=>{busy=false});
+});
+document.querySelectorAll('[data-all]').forEach(b=>b.addEventListener('click',()=>act(b,()=>cmd(0,b.dataset.all),b.dataset.all==='off'?t('allOffT'):t('allOnT'))));
+
+/* night mode settings */
+$('#nightList').addEventListener('focusin',e=>{if(e.target.tagName==='SELECT')nightFocus=true});
+$('#nightList').addEventListener('focusout',e=>{if(e.target.tagName==='SELECT')nightFocus=false});
+$('#nightList').addEventListener('change',e=>{
+  const row=e.target.closest('[data-nroom]');if(!row)return;
+  const v=k=>row.querySelector(`[data-n="${k}"]`);
+  const id=+row.dataset.nroom,on=v('on').checked?1:0;
+  nightFocus=false;
+  act(null,()=>post('/api/night',{id,on,from:v('from').value,to:v('to').value,pct:v('pct').value,delay:v('delay').value}),on?t('nightSaved'):t('nightOffT')).then(refresh);
+});
+
+/* pairing */
+$('#pairRoom').addEventListener('change',()=>$('#newRoomName').classList.toggle('hide',$('#pairRoom').value!=='new'));
+$('#pairStart').addEventListener('click',e=>act(e.target,async()=>{
+  let room=$('#pairRoom').value;
+  if(room==='new'){
+    const name=$('#newRoomName').value.trim();if(!name)throw new Error(t('nameNew'));
+    const used=new Set(S.rooms.map(r=>r.id));room=1;while(used.has(room))room++;
+    await post('/api/room',{id:room,name});$('#newRoomName').value='';
+  }
+  await refresh();pairEvFrom=S.ev;$('#pairEvents').innerHTML='';
+  await post('/api/pair',{room,s:180});await refresh();
+}));
+$('#pairStop').addEventListener('click',e=>act(e.target,async()=>{await post('/api/pair',{stop:1});await refresh()},t('pairClosed')));
+
+/* devices */
+$('#devices').addEventListener('change',e=>{
+  if(e.target.dataset.move===undefined)return;
+  const i=e.target.closest('[data-i]').dataset.i;
+  act(null,()=>post('/api/device',{i,room:e.target.value}),t('moved')).then(refresh);
+});
+$('#devices').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.arrows!==undefined){
+    const i=b.closest('[data-i]').dataset.i;
+    act(b,()=>post('/api/device',{i,arrows:1}),t('pressRemote'));return;
+  }
+  if(b.dataset.forget===undefined)return;
+  const i=b.closest('[data-i]').dataset.i;
+  if(confirm(t('confirmForget',i)))act(b,()=>post('/api/device',{i,forget:1}),t('removed')).then(refresh);
+});
+
+/* wifi */
+$('#scan').addEventListener('click',e=>act(e.target,async()=>{
+  e.target.textContent=t('scanning');
+  try{const r=await fetch('/api/scan');const aps=await r.json();
+    if(!Array.isArray(aps))throw new Error(tmsg(aps.error||t('scanFail')));
+    $('#ssidSel').innerHTML='<option value="">'+t('found',aps.length)+'</option>'+aps.sort((a,b)=>b.rssi-a.rssi).map(a=>`<option>${esc(a.ssid)}</option>`).join('');
+  }finally{e.target.textContent=t('scan')}
+}));
+$('#ssidSel').addEventListener('change',e=>{if(e.target.value){$('#ssid').value=e.target.value;$('#pass').focus()}});
+$('#showPw').addEventListener('click',e=>{const p=$('#pass');p.type=p.type==='password'?'text':'password';e.target.textContent=t(p.type==='password'?'show':'hide')});
+$('#saveWifi').addEventListener('click',e=>act(e.target,async()=>{
+  const ssid=$('#ssid').value.trim();if(!ssid)throw new Error(t('needSsid'));
+  await post('/api/wifi',{ssid,pass:$('#pass').value});
+  document.body.innerHTML=`<main><div class="card" style="margin-top:40px"><h2>${t('savedTitle')}</h2><p>${t('savedText',esc(ssid))}</p><p class="meta">${t('savedHint')}</p></div></main>`;
+}));
+
+document.querySelectorAll('[data-img]').forEach(e=>e.innerHTML=img(e.dataset.img));
+applyLang();
+refresh();pollEvents();
+setInterval(refresh,2000);
+setInterval(pollEvents,2000);
+setInterval(()=>{if(S&&S.pairing.open){refresh()}},1000);
+</script>
+</body>
+</html>
